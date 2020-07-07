@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/core.iml" filepath="$PROJECT_DIR$/.idea/modules/core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/db-prototyping.iml" filepath="$PROJECT_DIR$/.idea/modules/db-prototyping.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/db-prototyping-build.iml" filepath="$PROJECT_DIR$/.idea/modules/db-prototyping-build.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/doobie.iml" filepath="$PROJECT_DIR$/.idea/modules/doobie.iml" group="jdbc-db-md-wrapper" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/jdbc.iml" filepath="$PROJECT_DIR$/.idea/modules/jdbc.iml" group="jdbc-db-md-wrapper" />
+    </modules>
+  </component>
+</project>
