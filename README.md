@@ -39,7 +39,14 @@ Supports:
   Column, CrossReference, PrimaryKey, Table, Schema
   
 ToDo:
-  Addtribute, Function, ImportedKeys, TablePrivilege, TypeInfo, Procedure  
+  Addtribute, Function, ImportedKeys, TablePrivilege, TypeInfo, Procedure
+  
+# Dependency
+
+```libraryDependencies += "com.github.oletraveler" %% "db-prototyping" % "0.1.0-SNAPSHOT"```
+
+### CI
+[![Build Status](https://travis-ci.org/scala-bones/db-prototyping.svg?branch=master)](https://travis-ci.org/scala-bones/bones)    
 
 
  
