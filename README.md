@@ -1,7 +1,7 @@
 # Overview
 
 Provides the ability to create a Prototype schema in memory 
-and then compare the prototype schema to an existing schema to come up with differences.
+and then compare the prototype schema to an existing schema (using JDBC Database Metadata) to calculate with differences.
 
 This project also provides Case Class wrappers to the JDBC rows returned in DatabaseMetadata ResultSets.
 
@@ -44,6 +44,10 @@ ToDo:
 # Dependency
 
 ```libraryDependencies += "com.github.oletraveler" %% "db-prototyping" % "0.1.0-SNAPSHOT"```
+
+# Database Support
+
+  This project has only been tested and used with PostgreSQL.
 
 ### CI
 [![Build Status](https://travis-ci.org/scala-bones/db-prototyping.svg?branch=master)](https://travis-ci.org/scala-bones/bones)    
