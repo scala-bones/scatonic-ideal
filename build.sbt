@@ -34,7 +34,7 @@ lazy val commonSettings = Seq(
 lazy val core = (project in file("core"))
   .settings(
     commonSettings,
-    name := "jdbc-db-md-wrapper-core",
+    name := "db-prototyping",
     libraryDependencies ++= Seq(
       "org.scalatestplus" %% "scalatestplus-scalacheck" % "3.1.0.0-RC2" % Test,
       "org.scalatest" %% "scalatest-mustmatchers" % "3.2.0" % Test
