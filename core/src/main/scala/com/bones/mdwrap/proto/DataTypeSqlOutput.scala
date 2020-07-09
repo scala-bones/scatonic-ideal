@@ -8,7 +8,8 @@ abstract class DataTypeSqlOutput extends DataTypeOutput[String] {
   override def boolean: String = toCase("boolean")
 
   override def protoColumnOutput(protoColumn: ProtoColumn): String = {
-    s"${protoColumn.name} ${dataTypeOutput(protoColumn.dataType)}"
+    val nullableStr = if (protoColumn.nullable) "" else toCase(" not null")
+    s"${protoColumn.name} ${dataTypeOutput(protoColumn.dataType)}${nullableStr}"
   }
 
   override def binary(binaryType: BinaryType): String =
@@ -30,7 +31,6 @@ abstract class DataTypeSqlOutput extends DataTypeOutput[String] {
 
   override def integer(integerType: IntegerType): String =
     toCase("integer")
-
 
   override def interval: String = toCase("interval")
 

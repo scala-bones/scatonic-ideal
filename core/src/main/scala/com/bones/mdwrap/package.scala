@@ -2,16 +2,13 @@ package com.bones
 
 import java.sql.{DatabaseMetaData, Types}
 
-import com.bones.mdwrap.Nullable.{Val, values}
-import com.bones.mdwrap.UpdateDeleteRule.values
-
 package object mdwrap {
 
   case class Attribute(name: String)
   object Catalog {
     val catalogColumnName = "TABLE_CAT"
   }
-  case class Catalog(name: String, schemas: List[Schema])
+  case class Catalog(name: String)
   object UpdateDeleteRule extends Enumeration {
     case class Val protected (name: String, intId: Int) extends super.Val
     implicit def valueToVal(x: Value): Val = x.asInstanceOf[Val]
@@ -36,30 +33,29 @@ package object mdwrap {
       values.toList.find(_.intId == id)
     }
 
-    val ImportedKeyInitiallyDeferred = Val(
-      "ImportedKeyInitiallyDeferred",
-      DatabaseMetaData.importedKeyInitiallyDeferred)
-    val ImportedKeyInitiallyImmediate = Val(
-      "ImportedKeyInitiallyImmediate",
-      DatabaseMetaData.importedKeyInitiallyImmediate)
+    val ImportedKeyInitiallyDeferred =
+      Val("ImportedKeyInitiallyDeferred", DatabaseMetaData.importedKeyInitiallyDeferred)
+    val ImportedKeyInitiallyImmediate =
+      Val("ImportedKeyInitiallyImmediate", DatabaseMetaData.importedKeyInitiallyImmediate)
     val ImportedKeyNotDeferrable =
       Val("ImportedKeyNotDeferrable", DatabaseMetaData.importedKeyNotDeferrable)
 
   }
-  case class CrossReference(pkColumnCatalogName: Option[String],
-                            pkColumnSchemaName: Option[String],
-                            pkColumnTableName: String,
-                            pkColumnName: String,
-                            foreignCatalogName: Option[String],
-                            foreignSchemaName: Option[String],
-                            foreignTableName: String,
-                            foreignColumnName: String,
-                            keySequence: Short,
-                            updateRule: UpdateDeleteRule.Value,
-                            deleteRule: UpdateDeleteRule.Value,
-                            foreignKeyName: Option[String],
-                            primaryKeyName: Option[String],
-                            deferrability: Deferrability.Value)
+  case class CrossReference(
+    pkColumnCatalogName: Option[String],
+    pkColumnSchemaName: Option[String],
+    pkColumnTableName: String,
+    pkColumnName: String,
+    foreignCatalogName: Option[String],
+    foreignSchemaName: Option[String],
+    foreignTableName: String,
+    foreignColumnName: String,
+    keySequence: Short,
+    updateRule: UpdateDeleteRule.Value,
+    deleteRule: UpdateDeleteRule.Value,
+    foreignKeyName: Option[String],
+    primaryKeyName: Option[String],
+    deferrability: Deferrability.Value)
   object DataType extends Enumeration {
     protected case class Val(name: String, intId: Int) extends super.Val
     def findByConstant(typeId: Int) = values.find(_.intId == typeId)
@@ -151,40 +147,43 @@ package object mdwrap {
     val isGeneratedColumnCol = "IS_GENERATEDCOLUMN"
 
   }
-  case class Column(catalogName: Option[String],
-                    schemaName: Option[String],
-                    tableName: String,
-                    name: String,
-                    dataType: DataType.Value,
-                    typeName: String,
-                    columnSize: Int,
-                    decimalDigits: Option[Int],
-                    numPrecRadix: Int,
-                    nullable: Nullable.Value,
-                    remarks: Option[String],
-                    columnDefault: Option[String],
-                    characterOctetLength: Int,
-                    ordinalPosition: Int,
-                    isNullable: YesNo.YesNo,
-                    sourceDataType: Option[Short],
-                    isAutoIncrement: YesNo.YesNo,
-                    isGeneratedColumn: YesNo.YesNo)
+  case class Column(
+    catalogName: Option[String],
+    schemaName: Option[String],
+    tableName: String,
+    name: String,
+    dataType: DataType.Value,
+    typeName: String,
+    columnSize: Int,
+    decimalDigits: Option[Int],
+    numPrecRadix: Int,
+    nullable: Nullable.Value,
+    remarks: Option[String],
+    columnDefault: Option[String],
+    characterOctetLength: Int,
+    ordinalPosition: Int,
+    isNullable: YesNo.YesNo,
+    sourceDataType: Option[Short],
+    isAutoIncrement: YesNo.YesNo,
+    isGeneratedColumn: YesNo.YesNo)
   case class Function(name: String)
-  case class ImportedKeys(primaryKey: PrimaryKey,
-                          foreignColumn: Column,
-                          keySequence: Short,
-                          updateRule: UpdateDeleteRule.Value,
-                          deleteRule: UpdateDeleteRule.Value,
-                          foreignKeyName: Option[String],
-                          primaryKeyName: Option[String],
-                          deferrability: Deferrability.Value)
+  case class ImportedKeys(
+    primaryKey: PrimaryKey,
+    foreignColumn: Column,
+    keySequence: Short,
+    updateRule: UpdateDeleteRule.Value,
+    deleteRule: UpdateDeleteRule.Value,
+    foreignKeyName: Option[String],
+    primaryKeyName: Option[String],
+    deferrability: Deferrability.Value)
   case class IndexInfo()
   object TableType extends Enumeration {
     type TableType = Value
     case class Val protected (name: String) extends super.Val
     implicit def valueToNullableVal(x: Value): Val = x.asInstanceOf[Val]
 
-    def findByStr(str: String): Either[String, Value] = values.toList.find(_.name.equalsIgnoreCase(str)).toRight(str)
+    def findByStr(str: String): Either[String, Value] =
+      values.toList.find(_.name.equalsIgnoreCase(str)).toRight(str)
     val Table = Val("TABLE")
     val View = Val("VIEW")
     val SystemTable = Val("SYSTEM TABLE")
@@ -204,25 +203,26 @@ package object mdwrap {
     val User = Val("USER")
     val Derived = Val("DERIVED")
   }
-  case class Table(catalogName: Option[String],
-                   schemaName: Option[String],
-                   name: String,
-                   tableType: Either[String, TableType.Value],
-                   remarks: Option[String],
-                   typesCatalog: Option[String],
-                   typesSchema: Option[String],
-                   typeName: Option[String],
-                   selfReferencingColumnName: Option[String],
-                   referenceGeneration: Option[ReverenceGeneration.Value]
-)
+  case class Table(
+    catalogName: Option[String],
+    schemaName: Option[String],
+    name: String,
+    tableType: Either[String, TableType.Value],
+    remarks: Option[String],
+    typesCatalog: Option[String],
+    typesSchema: Option[String],
+    typeName: Option[String],
+    selfReferencingColumnName: Option[String],
+    referenceGeneration: Option[ReverenceGeneration.Value])
   case class TablePrivilege()
   case class TypeInfo()
-  case class PrimaryKey(catalogName: Option[String],
-                        schemaName: Option[String],
-                        tableName: String,
-                        columnName: String,
-                        keySequence: Short,
-                        name: Option[String])
+  case class PrimaryKey(
+    catalogName: Option[String],
+    schemaName: Option[String],
+    tableName: String,
+    columnName: String,
+    keySequence: Short,
+    name: Option[String])
   case class Procedure()
   case class Schema(name: String, tables: List[Table])
 }

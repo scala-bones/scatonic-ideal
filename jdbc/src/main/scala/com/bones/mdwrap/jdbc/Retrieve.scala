@@ -59,7 +59,7 @@ object Retrieve {
   private def catalogFromResultSet(rs: ResultSet): Try[List[Catalog]] = {
     if (rs.next()) {
       for {
-        catalog <- Try { Option(rs.getString(Catalog.catalogColumnName)).toList.map(Catalog(_, List.empty)) }
+        catalog <- Try { Option(rs.getString(Catalog.catalogColumnName)).toList.map(Catalog(_)) }
         catalogs <- catalogFromResultSet(rs)
       } yield catalog ::: catalogs
     } else {

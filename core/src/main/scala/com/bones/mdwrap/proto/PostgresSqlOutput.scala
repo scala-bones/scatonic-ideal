@@ -1,13 +1,8 @@
 package com.bones.mdwrap.proto
 
-import java.nio.charset.{Charset, StandardCharsets}
-
 case class PostgresSqlOutput(toCaseFunction: String => String) extends DataTypeSqlOutput {
 
   override def toCase(string: String): String = toCaseFunction(string)
-
-
-
 
   override def binary(binaryType: BinaryType): String =
     if (binaryType.size.contains(1)) toCase("bit") else toCase("bytea")
