@@ -8,7 +8,7 @@ import com.bones.mdwrap.{Column, DataType, DatabaseCache, Nullable, Table, YesNo
 object Diff {
 
   trait ColumnDiff
-  case class ColumnDataTypeDiff(existingDataType: DataType.Value, newDataType: DataType.Value)
+  case class ColumnDataTypeDiff(existingDataType: DataType.Value, newDataType: ProtoDataType)
       extends ColumnDiff
   case class ColumnRemarkDiff(existingRemark: Option[String], newRemark: Option[String])
       extends ColumnDiff
