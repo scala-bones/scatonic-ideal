@@ -73,7 +73,7 @@ package object mdwrap {
     val Decimal = Val("Decimal", Types.DECIMAL)
     val Char = Val("Char", Types.CHAR)
     val VarChar = Val("VarChar", Types.VARCHAR)
-    val LongChar = Val("LongVarChar", Types.LONGVARCHAR)
+    val LongVarChar = Val("LongVarChar", Types.LONGVARCHAR)
     val Date = Val("Date", Types.DATE)
     val Time = Val("Time", Types.TIME)
     val Timestamp = Val("Timestamp", Types.TIMESTAMP)

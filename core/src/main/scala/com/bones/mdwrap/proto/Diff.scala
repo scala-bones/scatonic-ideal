@@ -116,7 +116,7 @@ object Diff {
    */
   def compareColumn(column: ProtoColumn, diffColumn: Column): List[ColumnDiff] = {
     val dt =
-      if (column.dataType != diffColumn.dataType)
+      if (! isEquivalent(column.dataType, diffColumn.dataType, diffColumn))
         List(ColumnDataTypeDiff(diffColumn.dataType, column.dataType))
       else List.empty
     val rm =
@@ -131,6 +131,39 @@ object Diff {
       else List.empty
 
     dt ::: rm ::: nl ::: Nil
+  }
+
+  def isEquivalent(protoDataType: ProtoDataType, dataType: DataType.Value, column: Column): Boolean = {
+    (protoDataType, dataType) match {
+      case (BinaryType(size), DataType.Bit) if size.contains(1) => true
+      case (SmallIntType, DataType.TinyInt) => true
+      case (SmallIntType, DataType.SmallInt) => true
+      case (IntegerType(_), DataType.Integer) => true
+      case (LongType(_), DataType.BigInt) => true
+      case (RealType, DataType.Float) => true
+      case (RealType, DataType.Real) => true
+      case (DoubleType, DataType.Double) => true
+      case (NumericType(_,_), DataType.Numeric) => true //TODO: Check if precision is ok
+      case (NumericType(_,_), DataType.Decimal) => true //TODO: Check if precision is ok
+      case (StringType(sz, charset), DataType.VarChar) => true //TODO: check fixed rate
+      case (StringType(sz, charset), DataType.LongVarChar) => true
+      case (DateType, DataType.Date) => true
+      case (TimeType(tz), DataType.Time) if !tz => true
+      case (TimestampType(tz), DataType.Timestamp) if !tz => true
+      case (BinaryType(size), DataType.VarBinary) => true //TODO: check size
+      case (FixedLengthBinaryType(size), DataType.Binary) => true //TODO: check size
+      case (BinaryType(size), DataType.Blob) => true //TODO: check size
+      case (StringType(size,charset), DataType.Clob) => true  //TODO: check size
+      case (BooleanType, DataType.Boolean) => true
+      case (FixedLengthCharacterType(size, charset), DataType.NChar) => true
+      case (StringType(size, charset), DataType.NVarChar) => true
+      case (StringType(size, charset), DataType.LongNVarChar) => true
+      case (StringType(size, charset), DataType.NClob) => true
+      case (TimeType(tz), DataType.TimeWithTimeZone) if tz => true
+      case (TimestampType(tz), DataType.TimestampWithTimeZone) if tz => true
+      case _ => false
+    }
+
   }
 
 }
