@@ -144,7 +144,7 @@ object Fixtures {
       "occupation",
       DataType.VarChar,
       "text",
-      1000,
+      100,
       None,
       0,
       Nullable.ColumnNullable,
