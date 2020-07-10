@@ -30,19 +30,20 @@ object Diff {
     */
   def findDiff(databaseCache: DatabaseCache, protoSchema: ProtoSchema): (
     List[ProtoTable],
-    List[ProtoColumn],
+    List[(ProtoTable, ProtoColumn)],
     List[(ProtoColumn, List[ColumnDiff])],
     List[ProtoPrimaryKey],
     List[ProtoForeignKey]) = {
     val (missingTables, existingTables) =
       missingVsExistingTables(databaseCache, protoSchema.name, protoSchema.tables)
     val missingExistingColumns =
-      existingTables.foldLeft((List.empty[ProtoColumn], List.empty[(ProtoColumn, Column)])) {
+      existingTables.foldLeft((List.empty[(ProtoTable, ProtoColumn)], List.empty[(ProtoColumn, Column)])) {
         (result, table) =>
           {
             val missingExisting = missingVsExistingColumns(databaseCache, table._1, table._2)
+            val withTable = missingExisting._1.map(c => (table._1, c))
             result
-              .copy(_1 = result._1 ::: missingExisting._1)
+              .copy(_1 = result._1 ::: withTable)
               .copy(_2 = result._2 ::: missingExisting._2)
           }
       }
@@ -133,6 +134,13 @@ object Diff {
     dt ::: rm ::: nl ::: Nil
   }
 
+  /**
+   * Goal is to determine if the JDBC type satisfies the specified DataType for the ProtoColumn
+   * @param protoDataType
+   * @param dataType
+   * @param column
+   * @return
+   */
   def isEquivalent(protoDataType: ProtoDataType, dataType: DataType.Value, column: Column): Boolean = {
     (protoDataType, dataType) match {
       case (BinaryType(size), DataType.Bit) if size.contains(1) => true
@@ -143,22 +151,41 @@ object Diff {
       case (RealType, DataType.Float) => true
       case (RealType, DataType.Real) => true
       case (DoubleType, DataType.Double) => true
-      case (NumericType(_,_), DataType.Numeric) => true //TODO: Check if precision is ok
-      case (NumericType(_,_), DataType.Decimal) => true //TODO: Check if precision is ok
-      case (StringType(sz, charset), DataType.VarChar) => true //TODO: check fixed rate
-      case (StringType(sz, charset), DataType.LongVarChar) => true
+      case (NumericType(p,s), DataType.Numeric) =>
+        column.columnSize == p && column.decimalDigits.contains(s)
+      case (NumericType(p,s), DataType.Decimal) =>
+        column.columnSize == p && column.decimalDigits.contains(s)
+      case (StringType(sz, _), DataType.VarChar) =>
+        sz match {
+          case Some(i) if i > 255 => column.columnSize >= i
+          case Some(i) => column.columnSize == i
+          case None => column.typeName != "varchar" //eg, postgres uses "text" for unlimited size
+        }
+      case (StringType(sz, charset), DataType.LongVarChar) =>
+        sz match {
+          case Some(i) if i > 255 => column.columnSize >= i
+          case Some(i) => column.columnSize == i
+          case None => true
+        }
       case (DateType, DataType.Date) => true
       case (TimeType(tz), DataType.Time) if !tz => true
       case (TimestampType(tz), DataType.Timestamp) if !tz => true
-      case (BinaryType(size), DataType.VarBinary) => true //TODO: check size
-      case (FixedLengthBinaryType(size), DataType.Binary) => true //TODO: check size
-      case (BinaryType(size), DataType.Blob) => true //TODO: check size
-      case (StringType(size,charset), DataType.Clob) => true  //TODO: check size
+      case (BinaryType(size), DataType.VarBinary) =>
+        size.forall(column.columnSize > _)
+      case (FixedLengthBinaryType(size), DataType.Binary) =>
+        column.columnSize == size
+      case (BinaryType(size), DataType.Blob) =>
+        size.forall(column.columnSize > _)
+      case (StringType(size,_), DataType.Clob) =>
+        size.forall(column.columnSize > _)
       case (BooleanType, DataType.Boolean) => true
       case (FixedLengthCharacterType(size, charset), DataType.NChar) => true
-      case (StringType(size, charset), DataType.NVarChar) => true
-      case (StringType(size, charset), DataType.LongNVarChar) => true
-      case (StringType(size, charset), DataType.NClob) => true
+      case (StringType(size, _), DataType.NVarChar) =>
+        size.forall(column.columnSize > _)
+      case (StringType(size, _), DataType.LongNVarChar) =>
+        size.forall(column.columnSize > _)
+      case (StringType(size, _), DataType.NClob) =>
+        size.forall(column.columnSize > _)
       case (TimeType(tz), DataType.TimeWithTimeZone) if tz => true
       case (TimestampType(tz), DataType.TimestampWithTimeZone) if tz => true
       case _ => false

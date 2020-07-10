@@ -40,7 +40,7 @@ abstract class IntegrationFixture extends FixtureAnyFunSuite {
         | date_col DATE,
         | double_col DOUBLE PRECISION,
         | integer_col INTEGER,
-        | numeric_col NUMERIC,
+        | numeric_col NUMERIC(9,3),
         | real_col REAL,
         | small_int_col SMALLINT,
         | text_col TEXT,
