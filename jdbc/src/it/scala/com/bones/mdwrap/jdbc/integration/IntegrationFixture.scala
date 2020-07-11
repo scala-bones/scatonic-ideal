@@ -22,7 +22,6 @@ abstract class IntegrationFixture extends FixtureAnyFunSuite {
     } finally {
       dropTables(ds.getConnection)
     }
-
   }
 
 

@@ -1,6 +1,6 @@
 package com.bones.mdwrap.proto
 
-import com.bones.mdwrap.{Column, DataType, DatabaseCache, Nullable, Table, YesNo}
+import com.bones.mdwrap._
 
 /**
   * Diff the sub DB representation to what is in the Database Cache.
@@ -15,6 +15,15 @@ object Diff {
   case class ColumnNullableDiff(existingNullable: YesNo.Value, newNullable: YesNo.Value)
       extends ColumnDiff
 
+  case class PrimaryKeyDiff(missing: List[ProtoColumn], extraneousKeys: List[PrimaryKey])
+
+  case class DiffResult(tablesMissing: List[ProtoTable],
+                        columnsMissing: List[(ProtoTable, ProtoColumn)],
+                        columnsDifferent: List[(ProtoColumn, List[ColumnDiff])],
+                        primaryKeysMissing: List[(ProtoTable, ProtoColumn)],
+                        primaryKeysExtraneous: List[(ProtoTable, PrimaryKey)],
+                        missingForeignKeys: List[ProtoForeignKey])
+
   /**
     * Give a database Cache and a Schema Prototype, find the list of changes needed to be made
     * to the Database to be in sync with the Prototype.  This will only find adds and updates to the database.
@@ -25,19 +34,16 @@ object Diff {
     *         _1 = List of tables in the prototype which are not in the cache
     *         _2 = List of columns in the prototype which are not in the cache
     *         _3 = List of columns that are different in the prototype than in the cache
-    *         _4 = List of primary keys in the prototype which are not in the cache
-    *         _5 = List of foreign keys in the prototype which are not in the cache
+    *         _4 = List of primary keys that are expected in the table cache
+   *          _5 = List of primary keys on extra on a table cache
+    *         _6 = List of foreign keys in the prototype which are not in the cache
     */
-  def findDiff(databaseCache: DatabaseCache, protoSchema: ProtoSchema): (
-    List[ProtoTable],
-    List[(ProtoTable, ProtoColumn)],
-    List[(ProtoColumn, List[ColumnDiff])],
-    List[ProtoColumn], // Missing primary keys
-    List[ProtoForeignKey]) = {
+  def findDiff(databaseCache: DatabaseCache, protoSchema: ProtoSchema): DiffResult = {
     val (missingTables, existingTables) =
       missingVsExistingTables(databaseCache, protoSchema.name, protoSchema.tables)
     val missingExistingColumns =
-      existingTables.foldLeft((List.empty[(ProtoTable, ProtoColumn)], List.empty[(ProtoColumn, Column)])) {
+      existingTables.foldLeft(
+        (List.empty[(ProtoTable, ProtoColumn)], List.empty[(ProtoColumn, Column)])) {
         (result, table) =>
           {
             val missingExisting = missingVsExistingColumns(databaseCache, table._1, table._2)
@@ -54,11 +60,17 @@ object Diff {
       else Some((c._1, diff))
     }
 
-    (
+    val primaryKeyDifference = existingTables.map(table => {
+      val diff = findPrimaryKeyDifferences(databaseCache, protoSchema.name, table._1, table._2)
+      ( diff.missing.map( (table._1, _)), diff.extraneousKeys.map( (table._1, _)))
+    })
+
+    DiffResult(
       missingTables,
       missingExistingColumns._1,
       columnDiff,
-      List.empty[ProtoColumn],
+      primaryKeyDifference.flatMap(_._1),
+      primaryKeyDifference.flatMap(_._2),
       List.empty[ProtoForeignKey])
 
   }
@@ -70,7 +82,7 @@ object Diff {
     * @param schemaName The name of the prototype schema
     * @param tables The list of prototype tables we are looking up in the cache
     * @return Tuple2 where _1 is the list of missing tables and _2 is the
-   *         list of pair of the prototype table and the cached table.
+    *         list of pair of the prototype table and the cached table.
     */
   def missingVsExistingTables(
     databaseCache: DatabaseCache,
@@ -88,12 +100,12 @@ object Diff {
   }
 
   /**
-   * Compare the two tables and try to find a cached column which matches each of the columns in the protoype table.
-   * @param databaseCache The cache used for lookup.
-   * @param table The table prototype, what we want the table to look like
-   * @param diffTable The cached table
-   * @return Pair of List where _1 is the List of columns not found in the cache and _2 is the pair of matching prototype/existing columns
-   */
+    * Compare the two tables and try to find a cached column which matches each of the columns in the protoype table.
+    * @param databaseCache The cache used for lookup.
+    * @param table The table prototype, what we want the table to look like
+    * @param diffTable The cached table
+    * @return Pair of List where _1 is the List of columns not found in the cache and _2 is the pair of matching prototype/existing columns
+    */
   def missingVsExistingColumns(
     databaseCache: DatabaseCache,
     table: ProtoTable,
@@ -109,15 +121,47 @@ object Diff {
     }
   }
 
+  object PrimaryKeyDiff {
+    def withExtraneous(extraneous: List[PrimaryKey]): PrimaryKeyDiff =
+      PrimaryKeyDiff(List.empty, extraneous)
+  }
+
+  def findPrimaryKeyDifferences(
+    databaseCache: DatabaseCache,
+    schemaName: String,
+    table: ProtoTable,
+    diffTable: Table): PrimaryKeyDiff = {
+    val tablePks = databaseCache.primaryKeys.filter(pk => pk.schemaName.contains(schemaName) && pk.tableName == table.name)
+    //The list of Differences and remaining PrimaryKeys in the cache which
+    // are not currently matched up with a ProtoColumn
+    table.primaryKeyColumns.foldLeft(PrimaryKeyDiff.withExtraneous(tablePks)) {
+      (result, nextColumn) =>
+        {
+          val diff = result
+          val (matchingPks, remainingPks) = diff.extraneousKeys.partition(pk =>
+            pk.columnName == nextColumn.name)
+          matchingPks match {
+            case _ :: Nil =>
+              diff.copy(extraneousKeys = remainingPks)
+            case _ :: xs =>
+              //column matches more than one PK.  This shouldn't happen, so we'll use one and keep the rest in remaining
+              diff.copy(extraneousKeys = xs ::: remainingPks)
+            case _ =>
+              diff.copy(missing = nextColumn :: diff.missing)
+          }
+        }
+    }
+  }
+
   /**
-   * Compares two columns for differences, currently including data type, remarks or nullable.
-   * @param column The column prototype
-   * @param diffColumn The cached column for comparison
-   * @return List of differences
-   */
+    * Compares two columns for differences, currently including data type, remarks or nullable.
+    * @param column The column prototype
+    * @param diffColumn The cached column for comparison
+    * @return List of differences
+    */
   def compareColumn(column: ProtoColumn, diffColumn: Column): List[ColumnDiff] = {
     val dt =
-      if (! isEquivalent(column.dataType, diffColumn.dataType, diffColumn))
+      if (!isEquivalent(column.dataType, diffColumn.dataType, diffColumn))
         List(ColumnDataTypeDiff(diffColumn.dataType, column.dataType))
       else List.empty
     val rm =
@@ -135,40 +179,43 @@ object Diff {
   }
 
   /**
-   * Goal is to determine if the JDBC type satisfies the specified DataType for the ProtoColumn
-   * @param protoDataType
-   * @param dataType
-   * @param column
-   * @return
-   */
-  def isEquivalent(protoDataType: ProtoDataType, dataType: DataType.Value, column: Column): Boolean = {
+    * Goal is to determine if the JDBC type satisfies the specified DataType for the ProtoColumn
+    * @param protoDataType
+    * @param dataType
+    * @param column
+    * @return
+    */
+  def isEquivalent(
+    protoDataType: ProtoDataType,
+    dataType: DataType.Value,
+    column: Column): Boolean = {
     (protoDataType, dataType) match {
       case (BinaryType(size), DataType.Bit) if size.contains(1) => true
-      case (SmallIntType, DataType.TinyInt) => true
-      case (SmallIntType, DataType.SmallInt) => true
-      case (IntegerType(_), DataType.Integer) => true
-      case (LongType(_), DataType.BigInt) => true
-      case (RealType, DataType.Float) => true
-      case (RealType, DataType.Real) => true
-      case (DoubleType, DataType.Double) => true
-      case (NumericType(p,s), DataType.Numeric) =>
+      case (SmallIntType, DataType.TinyInt)                     => true
+      case (SmallIntType, DataType.SmallInt)                    => true
+      case (IntegerType(_), DataType.Integer)                   => true
+      case (LongType(_), DataType.BigInt)                       => true
+      case (RealType, DataType.Float)                           => true
+      case (RealType, DataType.Real)                            => true
+      case (DoubleType, DataType.Double)                        => true
+      case (NumericType(p, s), DataType.Numeric) =>
         column.columnSize == p && column.decimalDigits.contains(s)
-      case (NumericType(p,s), DataType.Decimal) =>
+      case (NumericType(p, s), DataType.Decimal) =>
         column.columnSize == p && column.decimalDigits.contains(s)
       case (StringType(sz, _), DataType.VarChar) =>
         sz match {
           case Some(i) if i > 255 => column.columnSize >= i
-          case Some(i) => column.columnSize == i
-          case None => column.typeName != "varchar" //eg, postgres uses "text" for unlimited size
+          case Some(i)            => column.columnSize == i
+          case None               => column.typeName != "varchar" //eg, postgres uses "text" for unlimited size
         }
       case (StringType(sz, charset), DataType.LongVarChar) =>
         sz match {
           case Some(i) if i > 255 => column.columnSize >= i
-          case Some(i) => column.columnSize == i
-          case None => true
+          case Some(i)            => column.columnSize == i
+          case None               => true
         }
-      case (DateType, DataType.Date) => true
-      case (TimeType(tz), DataType.Time) if !tz => true
+      case (DateType, DataType.Date)                      => true
+      case (TimeType(tz), DataType.Time) if !tz           => true
       case (TimestampType(tz), DataType.Timestamp) if !tz => true
       case (BinaryType(size), DataType.VarBinary) =>
         size.forall(column.columnSize > _)
@@ -176,9 +223,9 @@ object Diff {
         column.columnSize == size
       case (BinaryType(size), DataType.Blob) =>
         size.forall(column.columnSize > _)
-      case (StringType(size,_), DataType.Clob) =>
+      case (StringType(size, _), DataType.Clob) =>
         size.forall(column.columnSize > _)
-      case (BooleanType, DataType.Boolean) => true
+      case (BooleanType, DataType.Boolean)                           => true
       case (FixedLengthCharacterType(size, charset), DataType.NChar) => true
       case (StringType(size, _), DataType.NVarChar) =>
         size.forall(column.columnSize > _)
@@ -186,9 +233,9 @@ object Diff {
         size.forall(column.columnSize > _)
       case (StringType(size, _), DataType.NClob) =>
         size.forall(column.columnSize > _)
-      case (TimeType(tz), DataType.TimeWithTimeZone) if tz => true
+      case (TimeType(tz), DataType.TimeWithTimeZone) if tz           => true
       case (TimestampType(tz), DataType.TimestampWithTimeZone) if tz => true
-      case _ => false
+      case _                                                         => false
     }
 
   }
