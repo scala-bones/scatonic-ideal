@@ -37,10 +37,10 @@ class SchemaOutputTest extends AnyFunSuite with Matchers {
 
   test("sql output for tables") {
     val output = SchemaOutput.postgresTableStatement("public", table1)
-    output mustEqual "create table public.table1 (id serial not null, name text not null, age integer)"
+    output mustEqual "create table public.table1 (id serial not null primary key, name text not null, age integer)"
 
     val output2 = SchemaOutput.postgresTableStatement("public", table2)
-    output2 mustEqual "create table public.table2 (id serial not null, table1_id integer not null, occupation varchar(100) not null)"
+    output2 mustEqual "create table public.table2 (id serial not null primary key, table1_id integer not null, occupation varchar(100) not null)"
 
     val output3 = SchemaOutput.postgresTableStatement("public", table3)
     output3 mustEqual
@@ -50,6 +50,13 @@ class SchemaOutputTest extends AnyFunSuite with Matchers {
          |long_auto bigserial not null, numeric_col numeric(10,2), real_col real, small_int_col smallint,
          |time_col_with time with time zone, time_col_without time without time zone,
          |timestamp_col_with time with time zone, timestamp_col_without time without time zone)""".stripMargin.replaceAll("\n", " ")
+
+  }
+
+  test("multiple primary keys") {
+    val table = table1.copy(primaryKeyColumns = table1.primaryKeyColumns :+ ProtoColumn("other_id", LongType(), false, None))
+    val output = SchemaOutput.postgresTableStatement("public", table)
+    output mustEqual "create table public.table1 (id serial not null, other_id bigint not null, name text not null, age integer, primary key (id, other_id))"
 
   }
 

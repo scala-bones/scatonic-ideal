@@ -36,10 +36,10 @@ class DiffTest extends AnyFunSuite with Matchers {
     val otherNewColumn = ProtoColumn("other_new", StringType(), true, None)
     val tableA = table2.copy(columns =  newColumn :: table2.columns)
     val tableB = table1.copy(columns = otherNewColumn :: table1.columns)
-    val s = ProtoSchema("public", List(table1, tableA))
+    val s = ProtoSchema("public", List(tableA, tableB))
     val result = Diff.findDiff(databaseCache, s)
     result._1.length mustEqual 0
-    result._2 mustEqual List( (tableB, otherNewColumn), (tableA, newColumn))
+    result._2 mustEqual List( (tableA, newColumn), (tableB, otherNewColumn))
     result._3.length mustEqual 0
     result._4.length mustEqual 0
     result._5.length mustEqual 0
@@ -55,8 +55,8 @@ class DiffTest extends AnyFunSuite with Matchers {
       newNotNullable
     )
 
-    val newTable1 = ProtoTable("table1", tableColumnsChanged, List.empty, None)
-    val newTable2 = ProtoTable("table2", table2Columns, List.empty, None)
+    val newTable1 = ProtoTable("table1", tableColumnsChanged, List.empty, List.empty, None)
+    val newTable2 = ProtoTable("table2", table2Columns, List.empty, List.empty, None)
 
     val newSchema = ProtoSchema("public", List(newTable1, newTable2))
 

@@ -32,7 +32,7 @@ object Diff {
     List[ProtoTable],
     List[(ProtoTable, ProtoColumn)],
     List[(ProtoColumn, List[ColumnDiff])],
-    List[ProtoPrimaryKey],
+    List[ProtoColumn], // Missing primary keys
     List[ProtoForeignKey]) = {
     val (missingTables, existingTables) =
       missingVsExistingTables(databaseCache, protoSchema.name, protoSchema.tables)
@@ -58,7 +58,7 @@ object Diff {
       missingTables,
       missingExistingColumns._1,
       columnDiff,
-      List.empty[ProtoPrimaryKey],
+      List.empty[ProtoColumn],
       List.empty[ProtoForeignKey])
 
   }
@@ -98,7 +98,7 @@ object Diff {
     databaseCache: DatabaseCache,
     table: ProtoTable,
     diffTable: Table): (List[ProtoColumn], List[(ProtoColumn, Column)]) = {
-    table.columns.foldLeft((List.empty[ProtoColumn], List.empty[(ProtoColumn, Column)])) {
+    table.allColumns.foldLeft((List.empty[ProtoColumn], List.empty[(ProtoColumn, Column)])) {
       (result, protoColumn) =>
         {
           databaseCache.findColumnByName(diffTable, protoColumn.name) match {
