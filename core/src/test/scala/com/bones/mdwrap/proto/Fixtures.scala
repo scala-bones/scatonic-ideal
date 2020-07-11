@@ -166,13 +166,13 @@ object Fixtures {
     List.empty,
     List.empty)
 
+  val table1Pks = List(ProtoColumn("id", IntegerType.autoIncrement, false, None))
   val table1Columns = List(
-    ProtoColumn("id", IntegerType.autoIncrement, false, None),
     ProtoColumn("name", StringType(), false, None),
     ProtoColumn("age", IntegerType(), true, None)
   )
+  val table2Pks = List(ProtoColumn("id", IntegerType.autoIncrement, false, None))
   val table2Columns = List(
-    ProtoColumn("id", IntegerType.autoIncrement, false, None),
     ProtoColumn("table1_id", IntegerType(), false, None),
     ProtoColumn("occupation", StringType(100), false, None)
   )
@@ -198,9 +198,9 @@ object Fixtures {
     ProtoColumn("timestamp_col_without", TimestampType.withoutTimeZone(), true, None)
   )
 
-  val table1 = ProtoTable("table1", table1Columns, List.empty, None)
-  val table2 = ProtoTable("table2", table2Columns, List.empty, None)
-  val table3 = ProtoTable("table3", table3Columns, List.empty, None)
+  val table1 = ProtoTable("table1", table1Columns, table1Pks, List.empty, None)
+  val table2 = ProtoTable("table2", table2Columns, table2Pks, List.empty, None)
+  val table3 = ProtoTable("table3", table3Columns, List.empty, List.empty, None)
 
   val schema = ProtoSchema("public", List(table1, table2))
 

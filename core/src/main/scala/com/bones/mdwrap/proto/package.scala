@@ -50,9 +50,11 @@ package object proto {
   case class StringType(length: Option[Int], charset: Charset) extends ProtoDataType
 
   case class ProtoColumn(name: String, dataType: ProtoDataType, nullable: Boolean, remark: Option[String])
-  case class ProtoPrimaryKey(name: String, column: ProtoColumn)
-  case class ProtoForeignKey(name: String, column: ProtoColumn, foreignReference: (ProtoTable, ProtoColumn))
-  case class ProtoTable(name: String, columns: List[ProtoColumn], foreignKeys: List[ProtoForeignKey], remark: Option[String])
+  case class ProtoForeignKey(column: ProtoColumn, foreignReference: (ProtoTable, ProtoColumn))
+  case class ProtoTable(name: String, columns: List[ProtoColumn], primaryKeyColumns: List[ProtoColumn], foreignKeys: List[ProtoForeignKey], remark: Option[String]) {
+    /** combines columns, primary key columns and foreign key columns */
+    def allColumns: List[ProtoColumn] = primaryKeyColumns ::: columns ::: foreignKeys.map(_.column)
+  }
   case class ProtoSchema(name: String, tables: List[ProtoTable])
 
 }
