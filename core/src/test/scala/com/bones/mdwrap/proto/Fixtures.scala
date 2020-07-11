@@ -2,16 +2,7 @@ package com.bones.mdwrap.proto
 
 import java.nio.charset.{Charset, StandardCharsets}
 
-import com.bones.mdwrap.{
-  Column,
-  DataType,
-  DatabaseCache,
-  DatabaseQuery,
-  Nullable,
-  Table,
-  TableType,
-  YesNo
-}
+import com.bones.mdwrap.{Column, DataType, DatabaseCache, DatabaseQuery, Nullable, PrimaryKey, Table, TableType, YesNo}
 
 object Fixtures {
   val tables = List(
@@ -158,13 +149,17 @@ object Fixtures {
       YesNo.No)
   )
 
+  val table1Pk = PrimaryKey(None, Some("public"), "table1", "id", 1, Some("table1_id_pk"))
+  val table2Pk = PrimaryKey(None, Some("public"), "table2", "id", 1, Some("table2_id_pk"))
+  val pks = List(table1Pk, table2Pk)
+
   val databaseCache = DatabaseCache.apply(
     DatabaseQuery.everything,
     List.empty,
     tables,
     columns,
     List.empty,
-    List.empty)
+    pks)
 
   val table1Pks = List(ProtoColumn("id", IntegerType.autoIncrement, false, None))
   val table1Columns = List(

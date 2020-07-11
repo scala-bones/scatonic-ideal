@@ -26,7 +26,7 @@ val schemaDiff = Diff.findDiff(databaseCache, protoSchema)
 ```
 
 TODO:
-    PrimaryKeys, ForeignKeys
+    ForeignKeys
 
 # Database Cache
 This project provides [Case Class Wrappers for JDBC Database Metadata](https://github.com/scala-bones/db-prototyping/blob/master/core/src/main/scala/com/bones/mdwrap/package.scala).
@@ -41,7 +41,7 @@ This project provides [Case Class Wrappers for JDBC Database Metadata](https://g
 Supports:
   Column, CrossReference, PrimaryKey, Table, Schema
   
-ToDo:
+TODO:
   Attribute, Function, ImportedKeys, TablePrivilege, TypeInfo, Procedure
   
 # Dependency
@@ -50,7 +50,7 @@ ToDo:
 
 # Database Support
 
-  This project has only been tested and used with PostgreSQL.
+  This project has been tested and used only with PostgreSQL.
 
 ### CI
 [![Build Status](https://travis-ci.org/scala-bones/db-prototyping.svg?branch=master)](https://travis-ci.org/scala-bones/bones)    
