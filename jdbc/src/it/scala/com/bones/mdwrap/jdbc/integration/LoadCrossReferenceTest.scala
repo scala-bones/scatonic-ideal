@@ -3,7 +3,7 @@ package com.bones.mdwrap.jdbc.integration
 import java.sql.Connection
 
 import com.bones.mdwrap.jdbc.{Borrow, LoadCrossReference}
-import com.bones.mdwrap.{Column, DatabaseQuery, Deferrability, UpdateDeleteRule}
+import com.bones.mdwrap.{DatabaseQuery, Deferrability, UpdateDeleteRule}
 import org.scalatest.matchers.must.Matchers
 
 class LoadCrossReferenceTest extends IntegrationFixture with Matchers {

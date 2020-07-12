@@ -168,8 +168,14 @@ package object mdwrap {
     isGeneratedColumn: YesNo.YesNo)
   case class Function(name: String)
   case class ImportedKeys(
-    primaryKey: PrimaryKey,
-    foreignColumn: Column,
+    primaryKeyTableCatalogName: Option[String],
+    primaryKeyTableSchemaName: Option[String],
+    primaryKeyTableName: String,
+    primaryKeyColumnName: String,
+    foreignKeyTableCatalogName: Option[String],
+    foreignKeyTableSchemaName: Option[String],
+    foreignKeyTableName: String,
+    foreignKeyColumnName: String,
     keySequence: Short,
     updateRule: UpdateDeleteRule.Value,
     deleteRule: UpdateDeleteRule.Value,
