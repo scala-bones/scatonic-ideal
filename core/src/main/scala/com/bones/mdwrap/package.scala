@@ -166,7 +166,25 @@ package object mdwrap {
     sourceDataType: Option[Short],
     isAutoIncrement: YesNo.YesNo,
     isGeneratedColumn: YesNo.YesNo)
-  case class Function(name: String)
+
+  object FunctionType extends Enumeration {
+    case class Val protected (typeId: Int) extends super.Val
+    implicit def valueToNullableVal(x: Value): Val = x.asInstanceOf[Val]
+    def findById(typeId: Int) =
+      values.toList.find(_.typeId == typeId)
+
+    val FunctionResultUnknown = Val(0)
+    val FunctionNoTable = Val(1)
+    val FunctionReturnsTable = Val(2)
+  }
+  case class Function(
+    catalogName: Option[String],
+    schemaName: Option[String],
+    functionName: String,
+    remarks: Option[String],
+    functionType: FunctionType.Value,
+    specificName: String)
+
   case class ImportedKeys(
     primaryKeyTableCatalogName: Option[String],
     primaryKeyTableSchemaName: Option[String],

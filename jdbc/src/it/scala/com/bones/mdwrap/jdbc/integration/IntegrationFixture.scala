@@ -15,7 +15,7 @@ abstract class IntegrationFixture extends FixtureAnyFunSuite {
     val ds = new PGSimpleDataSource() ;
     ds.setURL("jdbc:postgresql://localhost/postgres?user=travis&password=secret")
     dropTables(ds.getConnection)
-    createTables(ds.getConnection)
+    createStructures(ds.getConnection)
     val theFixture = FixtureParam(() => ds.getConnection)
     try {
       withFixture(test.toNoArgTest(theFixture))
@@ -24,8 +24,35 @@ abstract class IntegrationFixture extends FixtureAnyFunSuite {
     }
   }
 
+  private def createFunction(con: Connection): Unit = {
+    val sql =
+      """
+        |CREATE OR REPLACE FUNCTION db_test_add(i1 integer, i2 integer) RETURNS integer
+        |    AS 'select i1 + i2;'
+        |    LANGUAGE SQL
+        |    IMMUTABLE
+        |    RETURNS NULL ON NULL INPUT;
+        |""".stripMargin
 
-  def createTables(con: Connection): Unit = {
+    val st1 = con.createStatement()
+    st1.execute(sql)
+    st1.close()
+
+  }
+
+  private def createProcedure(con: Connection): Unit = {
+    val sql =
+      """
+        |CREATE OR REPLACE PROCEDURE db_test_insert_data(a integer, b integer)
+        |LANGUAGE SQL
+        |AS $$
+        |INSERT INTO tbl VALUES (a);
+        |INSERT INTO tbl VALUES (b);
+        |$$;
+        |""".stripMargin
+  }
+
+  def createStructures(con: Connection): Unit = {
     val table1 =
       """
         |create table wrapper_table_a (
@@ -70,8 +97,8 @@ abstract class IntegrationFixture extends FixtureAnyFunSuite {
     st2.execute(table2)
     st2.close()
 
-
-
+    createFunction(con)
+    createProcedure(con)
 
     con.close()
 
@@ -88,6 +115,14 @@ abstract class IntegrationFixture extends FixtureAnyFunSuite {
     val st1 = con.createStatement()
     st1.execute(table1)
     st1.close()
+
+    val sf = con.createStatement()
+    sf.execute("drop function if exists db_test_add;")
+    sf.close()
+
+    val sp = con.createStatement()
+    sp.execute("drop procedure if exists db_test_insert_data")
+    sp.close()
 
     con.close()
   }

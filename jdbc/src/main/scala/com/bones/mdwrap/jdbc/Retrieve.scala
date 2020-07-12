@@ -11,15 +11,32 @@ object Retrieve {
 
   case class Hierarchy(catalogName: Option[String], schemaName: Option[String], tableName: Option[String])
 
+  private def catalogQuery(query: DatabaseQuery) =
+    if (query.catalogNames.isEmpty) List(None) else query.catalogNames.map(Some(_))
+
+  private def schemaQuery(query: DatabaseQuery) =
+    if (query.schemaNames.isEmpty) List(None) else query.schemaNames.map(Some(_))
   def databaseQueryToHierarchyQuery(query: DatabaseQuery): List[(Option[String], Option[String], Option[String])] = {
-    val catalogs = if (query.catalogNames.isEmpty) List(None) else query.catalogNames.map(Some(_))
-    val schemas = if (query.schemaNames.isEmpty) List(None) else query.schemaNames.map(Some(_))
-    val tables = if (query.tableNames.isEmpty) List(None) else query.schemaNames.map(Some(_))
+    val catalogs = catalogQuery(query)
+    val schemas = schemaQuery(query)
+    val tables = if (query.tableNames.isEmpty) List(None) else query.tableNames.map(Some(_))
     for {
       catalog <- catalogs
       schema <- schemas
       table <- tables
     } yield (catalog, schema, table)
+  }
+
+  def databaseQueryToFunctionQuery(query: DatabaseQuery): List[(Option[String], Option[String], Option[String])] = {
+    val catalogs = catalogQuery(query)
+    val schemas = schemaQuery(query)
+    val functions = if (query.functionNames.isEmpty) List(None) else query.functionNames.map(Some(_))
+
+    for {
+      catalog <- catalogs
+      schema <- schemas
+      function <- functions
+    } yield (catalog, schema, function)
   }
 
   def withConnection[X](f: Connection => X, createConnection: () => Connection): Try[X] = {
