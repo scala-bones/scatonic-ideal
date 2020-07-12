@@ -2,12 +2,13 @@ package com.bones.mdwrap
 
 object DatabaseQuery {
   def everything: DatabaseQuery =
-    DatabaseQuery(List.empty, List.empty, List.empty)
+    DatabaseQuery(List.empty, List.empty, List.empty, List.empty)
 }
 
 case class DatabaseQuery(catalogNames: List[String],
                          schemaNames: List[String],
-                         tableNames: List[String]) {
+                         tableNames: List[String],
+                         functionNames: List[String]) {
 
   /** Reduces the search to only the specified catalog name(s).
     * @param catalogName Must be an exact match to how the schema name is stored in the database
