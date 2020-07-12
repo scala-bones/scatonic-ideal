@@ -1,5 +1,5 @@
 lazy val commonSettings = Seq(
-  organization := "com.github.oletraveler",
+  organization := "io.github.scala-bones",
   scalaVersion := "2.13.2",
   version := "0.1.0-SNAPSHOT",
   homepage := Some(url("https://github.com/scala-bones/db-prototyping")),

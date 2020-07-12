@@ -2,45 +2,43 @@ package com.bones.mdwrap.jdbc
 
 import java.sql.{Connection, ResultSet}
 
-import com.bones.mdwrap.{CrossReference, DatabaseQuery, Deferrability, UpdateDeleteRule}
-import com.bones.mdwrap.jdbc.Retrieve.databaseQueryToHierarchyQuery
+import com.bones.mdwrap.{DatabaseQuery, Deferrability, ImportedKeys, UpdateDeleteRule}
 
 import scala.util.Try
+import com.bones.mdwrap.jdbc.Retrieve.databaseQueryToHierarchyQuery
 
-object LoadCrossReference {
+
+object LoadImportedKeys {
 
   def load(
-    databaseQuery: DatabaseQuery,
-    borrowCon: Borrow[Connection]): Try[List[CrossReference]] = {
+            databaseQuery: DatabaseQuery,
+            borrowCon: Borrow[Connection]): Try[List[ImportedKeys]] = {
     val queryParams = databaseQueryToHierarchyQuery(databaseQuery)
     borrowCon.borrow(con =>
       Try {
         queryParams
           .flatMap(param => {
-            val crRs = con.getMetaData.getCrossReference(
-              param._1.orNull,
-              param._2.orNull,
-              param._3.orNull,
+            val crRs = con.getMetaData.getImportedKeys(
               param._1.orNull,
               param._2.orNull,
               param._3.orNull)
-            crossReferencesFromRs(crRs)
+            importedKeysFromRs(crRs)
 
           })
           .distinct
-    })
+      })
   }
 
-  private def crossReferencesFromRs(rs: ResultSet): List[CrossReference] = {
-    val result = new Iterator[CrossReference] {
-      def hasNext = rs.next()
-      def next() = extractRow(rs)
+  private def importedKeysFromRs(rs: ResultSet): List[ImportedKeys] = {
+    val result = new Iterator[ImportedKeys] {
+      def hasNext: Boolean = rs.next()
+      def next(): ImportedKeys = extractRow(rs)
     }.toList
     rs.close()
     result
   }
 
-  private def extractRow(rs: ResultSet): CrossReference = {
+  private def extractRow(rs: ResultSet): ImportedKeys = {
     val updateRuleId = rs.getInt("UPDATE_RULE")
     val updateRule = UpdateDeleteRule
       .findById(updateRuleId)
@@ -57,7 +55,8 @@ object LoadCrossReference {
       .getOrElse(
         throw new IllegalStateException(s"could not find Deferrability by id: ${deferrabilityId}"))
 
-    CrossReference(
+
+    ImportedKeys(
       Option(rs.getString("PKTABLE_CAT")),
       Option(rs.getString("PKTABLE_SCHEM")),
       req(rs.getString("PKTABLE_NAME")),
@@ -70,10 +69,11 @@ object LoadCrossReference {
       updateRule,
       deleteRule,
       Option(rs.getString("FK_NAME")),
-      Option(rs.getString(("PK_NAME"))),
+      Option(rs.getString("PK_NAME")),
       deferrability
     )
 
   }
+
 
 }

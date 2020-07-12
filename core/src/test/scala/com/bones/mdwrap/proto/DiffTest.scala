@@ -115,9 +115,6 @@ class DiffTest extends AnyFunSuite with Matchers {
 
     result.primaryKeysExtraneous(0) mustEqual (table, table1Pk)
 
-
-
-
   }
 
 }
