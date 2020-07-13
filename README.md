@@ -42,7 +42,8 @@ Supports:
   Column, CrossReference, PrimaryKey, Table, Schema, ImportedKeys, Function
   
 TODO:
-  Attribute, TablePrivilege, TypeInfo, Procedure
+  Attribute (untested because not supported in postgres), 
+  TablePrivilege, TypeInfo, Procedure
   
 # Dependency
 

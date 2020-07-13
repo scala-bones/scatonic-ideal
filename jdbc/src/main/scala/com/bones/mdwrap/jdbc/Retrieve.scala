@@ -39,6 +39,17 @@ object Retrieve {
     } yield (catalog, schema, function)
   }
 
+  def databaseQueryToAttributeQuery(query: DatabaseQuery): List[(Option[String], Option[String], Option[String])] = {
+    val catalogs = catalogQuery(query)
+    val schemas = schemaQuery(query)
+    val attributes = if (query.attributeNames.isEmpty) List(None) else query.attributeNames.map(Some(_))
+    for {
+      catalog <- catalogs
+      schema <- schemas
+      attribute <- attributes
+    } yield (catalog, schema, attribute)
+  }
+
   def withConnection[X](f: Connection => X, createConnection: () => Connection): Try[X] = {
     val newConnection = createConnection()
     val doIt = Try {

@@ -2,9 +2,29 @@ package com.bones
 
 import java.sql.{DatabaseMetaData, Types}
 
+import scala.collection.immutable.IntMap
+
 package object mdwrap {
 
-  case class Attribute(name: String)
+  case class DbAttribute(catalogName: Option[String],
+                         schemaName: Option[String],
+                         typeName: String,
+                         attributeName: String,
+                         dataType: DataType.Value,
+                         attributeTypeName: String,
+                         attributeSize: Int,
+                         decimalDigits: Option[Int],
+                         radix: Int,
+                         nullable: Nullable.Value,
+                         remarks: Option[String],
+                         defaultValue: Option[String],
+                         characterOctetLength: Option[Int],
+                         ordinalPotion: Int,
+                         isNullable: YesNo.Value,
+                         scopeCatalog: Option[String],
+                         scopeSchema: Option[String],
+                         scopeTable: Option[String],
+                         sourceDataType: Option[String])
   object Catalog {
     val catalogColumnName = "TABLE_CAT"
   }
