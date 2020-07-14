@@ -2,29 +2,28 @@ package com.bones
 
 import java.sql.{DatabaseMetaData, Types}
 
-import scala.collection.immutable.IntMap
-
 package object mdwrap {
 
-  case class DbAttribute(catalogName: Option[String],
-                         schemaName: Option[String],
-                         typeName: String,
-                         attributeName: String,
-                         dataType: DataType.Value,
-                         attributeTypeName: String,
-                         attributeSize: Int,
-                         decimalDigits: Option[Int],
-                         radix: Int,
-                         nullable: Nullable.Value,
-                         remarks: Option[String],
-                         defaultValue: Option[String],
-                         characterOctetLength: Option[Int],
-                         ordinalPotion: Int,
-                         isNullable: YesNo.Value,
-                         scopeCatalog: Option[String],
-                         scopeSchema: Option[String],
-                         scopeTable: Option[String],
-                         sourceDataType: Option[String])
+  case class DbAttribute(
+    catalogName: Option[String],
+    schemaName: Option[String],
+    typeName: String,
+    attributeName: String,
+    dataType: DataType.Value,
+    attributeTypeName: String,
+    attributeSize: Int,
+    decimalDigits: Option[Int],
+    radix: Int,
+    nullable: Nullable.Value,
+    remarks: Option[String],
+    defaultValue: Option[String],
+    characterOctetLength: Option[Int],
+    ordinalPotion: Int,
+    isNullable: YesNo.Value,
+    scopeCatalog: Option[String],
+    scopeSchema: Option[String],
+    scopeTable: Option[String],
+    sourceDataType: Option[String])
   object Catalog {
     val catalogColumnName = "TABLE_CAT"
   }
@@ -141,7 +140,7 @@ package object mdwrap {
     }
     def findByOptionalString(opt: Option[String]): Option[Value] = opt match {
       case Some(str) => findByString(str)
-      case None => Some(Unknown)
+      case None      => Some(Unknown)
     }
     type YesNo = Value
     val Yes, No, Unknown = Value
@@ -270,7 +269,39 @@ package object mdwrap {
     grantee: String,
     privilege: String,
     isGrantable: YesNo.Value)
-  case class TypeInfo()
+
+  object Searchable extends Enumeration {
+    case class Val(searchableId: Int, name: String, description: String) extends super.Val
+    implicit def valueToNullableVal(x: Value): Val = x.asInstanceOf[Val]
+    def findBySearchableId(searchableId: Int): Option[Value] =
+      values.find(_.searchableId == searchableId)
+
+    val TypePredNone = Val(DatabaseMetaData.typePredNone, "typePredNone", "No support")
+    val TypePredChar =
+      Val(DatabaseMetaData.typePredChar, "typePredChar", "Only supported with WHERE .. LIKE")
+    val typePredBasic =
+      Val(DatabaseMetaData.typePredBasic, "typePredBasic", "Supported except for WHERE .. LIKE")
+    val typeSearchable =
+      Val(DatabaseMetaData.typeSearchable, "typeSearchable", "Supported for all WHERE ..")
+  }
+  case class TypeInfo(
+    typeName: String,
+    dataType: DataType.Value,
+    precision: Int,
+    literalPrefix: Option[String],
+    literalSuffix: Option[String],
+    createParameters: Option[String],
+    nullable: Nullable.Value,
+    caseSensitive: Boolean,
+    searchable: Searchable.Value,
+    isUnsigned: Boolean,
+    fixedPrecisionScale: Boolean,
+    autoIncrement: Boolean,
+    localTypeName: Option[String],
+    minimumScale: Short,
+    maximumScale: Short,
+    numericalPrecistionRadix: Int
+  )
   case class PrimaryKey(
     catalogName: Option[String],
     schemaName: Option[String],
