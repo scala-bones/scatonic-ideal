@@ -28,6 +28,20 @@ object Retrieve {
     } yield (catalog, schema, table)
   }
 
+  def databaseQueryToProcedureQuery(
+                                     query: DatabaseQuery): List[(Option[String], Option[String], Option[String])] = {
+    val catalogs = catalogQuery(query)
+    val schemas = schemaQuery(query)
+    val procedures =
+      if (query.procedureNames.isEmpty) List(None) else query.procedureNames.map(Some(_))
+
+    for {
+      catalog <- catalogs
+      schema <- schemas
+      procedure <- procedures
+    } yield (catalog, schema, procedure)
+  }
+
   def databaseQueryToFunctionQuery(
     query: DatabaseQuery): List[(Option[String], Option[String], Option[String])] = {
     val catalogs = catalogQuery(query)

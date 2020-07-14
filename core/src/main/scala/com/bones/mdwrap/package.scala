@@ -309,6 +309,25 @@ package object mdwrap {
     columnName: String,
     keySequence: Short,
     name: Option[String])
-  case class Procedure()
+
+  object ProcedureType extends Enumeration {
+    case class Val(procedureTypeId: Int, name: String, description: String) extends super.Val
+    implicit def valueToNullableVal(x: Value): Val = x.asInstanceOf[Val]
+    def findByProcedureTypeId(procedureTypeId: Int): Option[Value] =
+      values.find(_.procedureTypeId == procedureTypeId)
+
+    val ProcedureResultUnknown = Val(DatabaseMetaData.procedureResultUnknown, "procedureResultUnknown", "Cannot determine if  a return value will be returned")
+    val ProcedureNoResult = Val(DatabaseMetaData.procedureNoResult, "procedureNoResult", "Does not return a return value")
+    val ProcedureReturnsResult = Val(DatabaseMetaData.procedureReturnsResult, "procedureReturnsResult", "Returns a return value")
+
+  }
+  case class Procedure(
+    catalogName: Option[String],
+    schemaName: Option[String],
+    name: String,
+    remarks: Option[String],
+    procedureType: ProcedureType.Value,
+    specificName: String)
+
   case class Schema(name: String, tables: List[Table])
 }

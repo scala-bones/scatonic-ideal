@@ -47,10 +47,15 @@ abstract class IntegrationFixture extends FixtureAnyFunSuite {
         |CREATE OR REPLACE PROCEDURE db_test_insert_data(a integer, b integer)
         |LANGUAGE SQL
         |AS $$
-        |INSERT INTO tbl VALUES (a);
-        |INSERT INTO tbl VALUES (b);
+        |INSERT INTO wrapper_table_b VALUES (a,b);
+        |INSERT INTO wrapper_table_b VALUES (b,a);
         |$$;
         |""".stripMargin
+
+    val st1 = con.createStatement()
+    st1.execute(sql)
+    st1.close()
+
   }
 
   def createStructures(con: Connection): Unit = {
