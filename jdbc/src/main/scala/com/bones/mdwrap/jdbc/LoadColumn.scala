@@ -7,29 +7,19 @@ import com.bones.mdwrap.jdbc.Retrieve.databaseQueryToHierarchyQuery
 
 import scala.util.Try
 
-object LoadColumn {
+object LoadColumn extends DefaultLoader[Column] {
 
-  def load(databaseQuery: DatabaseQuery, con: Connection): List[Column] = {
+
+  override protected def loadFromQuery(databaseQuery: DatabaseQuery, con: Connection): LazyList[ResultSet] = {
     val queryParams = databaseQueryToHierarchyQuery(databaseQuery)
-    queryParams
-      .flatMap(queryParam => {
-        val resultSet = con.getMetaData
-          .getColumns(queryParam._1.orNull, queryParam._2.orNull, queryParam._3.orNull, null)
-        try columnsFromResultSet(resultSet)
-        finally resultSet.close()
-      })
-      .distinct
+    queryParams.to(LazyList).map(queryParam =>
+      con.getMetaData
+        .getColumns(queryParam._1.orNull, queryParam._2.orNull, queryParam._3.orNull, null)
+    )
   }
 
-  def columnsFromResultSet(rs: ResultSet): List[Column] = {
-    val result = new Iterator[Column] {
-      def hasNext = rs.next()
-      def next() = extractRow(rs)
-    }.toList
-    result
-  }
 
-  private def extractRow(rs: ResultSet): Column = {
+  override protected def extractRow(rs: ResultSet): Column = {
     val dataTypeId = rs.getInt(Column.dataTypeCol)
     val dataType = DataType
       .findByConstant(dataTypeId)

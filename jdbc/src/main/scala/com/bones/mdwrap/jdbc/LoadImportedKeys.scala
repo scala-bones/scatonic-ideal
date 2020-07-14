@@ -2,41 +2,20 @@ package com.bones.mdwrap.jdbc
 
 import java.sql.{Connection, ResultSet}
 
+import com.bones.mdwrap.jdbc.Retrieve.databaseQueryToHierarchyQuery
 import com.bones.mdwrap.{DatabaseQuery, Deferrability, ImportedKeys, UpdateDeleteRule}
 
-import scala.util.Try
-import com.bones.mdwrap.jdbc.Retrieve.databaseQueryToHierarchyQuery
+object LoadImportedKeys extends DefaultLoader[ImportedKeys] {
 
+  override protected def loadFromQuery(
+    databaseQuery: DatabaseQuery,
+    con: Connection): LazyList[ResultSet] =
+    databaseQueryToHierarchyQuery(databaseQuery)
+      .to(LazyList)
+      .map(param =>
+        con.getMetaData.getImportedKeys(param._1.orNull, param._2.orNull, param._3.orNull))
 
-object LoadImportedKeys {
-
-  def load(
-            databaseQuery: DatabaseQuery,
-            con: Connection): Try[List[ImportedKeys]] = {
-    val queryParams = databaseQueryToHierarchyQuery(databaseQuery)
-      Try {
-        queryParams
-          .flatMap(param => {
-            val crRs = con.getMetaData.getImportedKeys(
-              param._1.orNull,
-              param._2.orNull,
-              param._3.orNull)
-            try
-              importedKeysFromRs(crRs)
-            finally
-              crRs.close()
-          })
-          .distinct
-      }
-  }
-
-  def importedKeysFromRs(rs: ResultSet): List[ImportedKeys] =
-    new Iterator[ImportedKeys] {
-      def hasNext: Boolean = rs.next()
-      def next(): ImportedKeys = extractRow(rs)
-    }.toList
-
-  private def extractRow(rs: ResultSet): ImportedKeys = {
+  protected def extractRow(rs: ResultSet): ImportedKeys = {
     val updateRuleId = rs.getInt("UPDATE_RULE")
     val updateRule = UpdateDeleteRule
       .findById(updateRuleId)
@@ -52,7 +31,6 @@ object LoadImportedKeys {
       .findById(deferrabilityId)
       .getOrElse(
         throw new IllegalStateException(s"could not find Deferrability by id: ${deferrabilityId}"))
-
 
     ImportedKeys(
       Option(rs.getString("PKTABLE_CAT")),
@@ -72,6 +50,5 @@ object LoadImportedKeys {
     )
 
   }
-
 
 }

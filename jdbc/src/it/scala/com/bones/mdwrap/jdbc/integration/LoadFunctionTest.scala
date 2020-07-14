@@ -12,7 +12,7 @@ class LoadFunctionTest extends IntegrationFixture with Matchers {
     val query = DatabaseQuery.everything
     val functions = LoadFunction.load(query, f.con)
 
-    val function = functions.get.filter(_.functionName == "db_test_add").head
+    val function = functions.filter(_.functionName == "db_test_add").head
 
     function.catalogName mustEqual Some("postgres")
     function.schemaName mustEqual Some("public")

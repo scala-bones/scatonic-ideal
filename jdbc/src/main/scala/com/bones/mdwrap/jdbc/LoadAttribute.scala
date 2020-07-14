@@ -5,39 +5,16 @@ import java.sql.{Connection, ResultSet, SQLException}
 import com.bones.mdwrap._
 import com.bones.mdwrap.jdbc.Retrieve.databaseQueryToAttributeQuery
 
-object LoadAttribute {
+object LoadAttribute extends DefaultLoader[DbAttribute ] {
 
-  /** Use the specific DatabaseQuery to load the Attributes */
-  def load(databaseQuery: DatabaseQuery, con: Connection): List[DbAttribute] = {
+
+  override protected def loadFromQuery(databaseQuery: DatabaseQuery, con: Connection): LazyList[ResultSet] = {
     val queryParams = databaseQueryToAttributeQuery(databaseQuery)
-    queryParams
-      .flatMap(queryParam => {
-        val resultSet = con.getMetaData
-          .getAttributes(queryParam._1.orNull, queryParam._2.orNull, null, queryParam._3.orNull)
-        try attributesFromResultSet(resultSet)
-        finally resultSet.close()
-      })
-      .distinct
+    queryParams.to(LazyList).map(queryParam =>
+      con.getMetaData.getAttributes(queryParam._1.orNull, queryParam._2.orNull, null, queryParam._3.orNull))
   }
 
-  /**
-    * Accumulates the result from a ResultSet created by the #DatabaseMetadata.getAtrributes() call.
-    *
-    * for exmple:
-    *    load(con.getMetaData.getAttributes(null, null, null, "myAttribute"))
-    *
-    * @param rs The result set to iterate through. Caller is responsible for closing this.
-    * @return
-    * @throws SQLException Propagated from calling the ResultSet methods.
-    */
-  def attributesFromResultSet(rs: ResultSet): List[DbAttribute] = {
-    new Iterator[DbAttribute] {
-      def hasNext = rs.next()
-      def next() = extractRow(rs)
-    }.toList
-  }
-
-  private def extractRow(rs: ResultSet): DbAttribute = {
+  override protected def extractRow(rs: ResultSet): DbAttribute = {
     val dataTypeInt = req(rs.getInt("DATA_TYPE"))
     val dataType = DataType
       .findByConstant(dataTypeInt)

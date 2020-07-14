@@ -5,36 +5,24 @@ import java.sql.{Connection, ResultSet}
 import com.bones.mdwrap.jdbc.Retrieve.databaseQueryToHierarchyQuery
 import com.bones.mdwrap.{CrossReference, DatabaseQuery, Deferrability, UpdateDeleteRule}
 
-import scala.util.Try
+object LoadCrossReference extends DefaultLoader[CrossReference] {
 
-object LoadCrossReference {
 
-  def load(databaseQuery: DatabaseQuery, con: Connection): List[CrossReference] = {
-    val queryParams = databaseQueryToHierarchyQuery(databaseQuery)
-      queryParams
-        .flatMap(param => {
-          val crRs = con.getMetaData.getCrossReference(
-            param._1.orNull,
-            param._2.orNull,
-            param._3.orNull,
-            param._1.orNull,
-            param._2.orNull,
-            param._3.orNull)
-          try crossReferencesFromRs(crRs)
-          finally crRs.close
-        })
-        .distinct
+  override protected def loadFromQuery(databaseQuery: DatabaseQuery, con: Connection): LazyList[ResultSet] = {
+    val queryParams = databaseQueryToHierarchyQuery(databaseQuery).to(LazyList)
+    queryParams.map(param =>
+      con.getMetaData.getCrossReference(
+        param._1.orNull,
+        param._2.orNull,
+        param._3.orNull,
+        param._1.orNull,
+        param._2.orNull,
+        param._3.orNull)
+    )
   }
 
-  def crossReferencesFromRs(rs: ResultSet): List[CrossReference] = {
-    val result = new Iterator[CrossReference] {
-      def hasNext = rs.next()
-      def next() = extractRow(rs)
-    }.toList
-    result
-  }
 
-  private def extractRow(rs: ResultSet): CrossReference = {
+  protected override def extractRow(rs: ResultSet): CrossReference = {
     val updateRuleId = rs.getInt("UPDATE_RULE")
     val updateRule = UpdateDeleteRule
       .findById(updateRuleId)
