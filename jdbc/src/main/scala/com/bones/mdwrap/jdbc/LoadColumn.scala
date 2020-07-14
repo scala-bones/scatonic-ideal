@@ -2,25 +2,31 @@ package com.bones.mdwrap.jdbc
 
 import java.sql.{Connection, ResultSet}
 
+import com.bones.mdwrap._
 import com.bones.mdwrap.jdbc.Retrieve.databaseQueryToHierarchyQuery
-import com.bones.mdwrap.{Column, DataType, DatabaseQuery, Nullable, YesNo}
 
 import scala.util.Try
 
 object LoadColumn {
 
-  def load(databaseQuery: DatabaseQuery, borrow: Borrow[Connection]): Try[List[Column]] = {
+  def load(databaseQuery: DatabaseQuery, con: Connection): List[Column] = {
     val queryParams = databaseQueryToHierarchyQuery(databaseQuery)
-    borrow.borrow(con =>
-      Try {
-        queryParams
-          .flatMap(queryParam => {
-            val resultSet = con.getMetaData
-              .getColumns(queryParam._1.orNull, queryParam._2.orNull, queryParam._3.orNull, null)
-            columnsFromResultSet(resultSet)
-          })
-          .distinct
-    })
+    queryParams
+      .flatMap(queryParam => {
+        val resultSet = con.getMetaData
+          .getColumns(queryParam._1.orNull, queryParam._2.orNull, queryParam._3.orNull, null)
+        try columnsFromResultSet(resultSet)
+        finally resultSet.close()
+      })
+      .distinct
+  }
+
+  def columnsFromResultSet(rs: ResultSet): List[Column] = {
+    val result = new Iterator[Column] {
+      def hasNext = rs.next()
+      def next() = extractRow(rs)
+    }.toList
+    result
   }
 
   private def extractRow(rs: ResultSet): Column = {
@@ -64,15 +70,6 @@ object LoadColumn {
       isAutoIncrement,
       isGeneratedColumn
     )
-  }
-
-  private def columnsFromResultSet(rs: ResultSet): List[Column] = {
-    val result = new Iterator[Column] {
-      def hasNext = rs.next()
-      def next() = extractRow(rs)
-    }.toList
-    rs.close()
-    result
   }
 
 }

@@ -2,41 +2,35 @@ package com.bones.mdwrap.jdbc
 
 import java.sql.{Connection, ResultSet}
 
-import com.bones.mdwrap.{CrossReference, DatabaseQuery, Deferrability, UpdateDeleteRule}
 import com.bones.mdwrap.jdbc.Retrieve.databaseQueryToHierarchyQuery
+import com.bones.mdwrap.{CrossReference, DatabaseQuery, Deferrability, UpdateDeleteRule}
 
 import scala.util.Try
 
 object LoadCrossReference {
 
-  def load(
-    databaseQuery: DatabaseQuery,
-    borrowCon: Borrow[Connection]): Try[List[CrossReference]] = {
+  def load(databaseQuery: DatabaseQuery, con: Connection): List[CrossReference] = {
     val queryParams = databaseQueryToHierarchyQuery(databaseQuery)
-    borrowCon.borrow(con =>
-      Try {
-        queryParams
-          .flatMap(param => {
-            val crRs = con.getMetaData.getCrossReference(
-              param._1.orNull,
-              param._2.orNull,
-              param._3.orNull,
-              param._1.orNull,
-              param._2.orNull,
-              param._3.orNull)
-            crossReferencesFromRs(crRs)
-
-          })
-          .distinct
-    })
+      queryParams
+        .flatMap(param => {
+          val crRs = con.getMetaData.getCrossReference(
+            param._1.orNull,
+            param._2.orNull,
+            param._3.orNull,
+            param._1.orNull,
+            param._2.orNull,
+            param._3.orNull)
+          try crossReferencesFromRs(crRs)
+          finally crRs.close
+        })
+        .distinct
   }
 
-  private def crossReferencesFromRs(rs: ResultSet): List[CrossReference] = {
+  def crossReferencesFromRs(rs: ResultSet): List[CrossReference] = {
     val result = new Iterator[CrossReference] {
       def hasNext = rs.next()
       def next() = extractRow(rs)
     }.toList
-    rs.close()
     result
   }
 

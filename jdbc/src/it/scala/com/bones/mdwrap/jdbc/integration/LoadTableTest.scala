@@ -1,7 +1,7 @@
 package com.bones.mdwrap.jdbc.integration
 
 import com.bones.mdwrap.{DatabaseQuery, TableType}
-import com.bones.mdwrap.jdbc.{Borrow, LoadTable}
+import com.bones.mdwrap.jdbc.LoadTable
 import org.scalatest.matchers.must.Matchers
 
 class LoadTableTest extends IntegrationFixture with Matchers {
@@ -9,11 +9,9 @@ class LoadTableTest extends IntegrationFixture with Matchers {
   test("load public tables") { f =>
     val query = DatabaseQuery.everything.schemas("public")
 
-    val borrow = new Borrow(f.con)
+    val allTypes = LoadTable.loadTypes(query, f.con, TableType.Table)
 
-    val allTypes = LoadTable.loadTypes(query, borrow, TableType.Table)
-
-    val tables = allTypes.get.filter(_.tableType == Right(TableType.Table))
+    val tables = allTypes.filter(_.tableType == Right(TableType.Table))
 
     tables(0).catalogName mustEqual None
     tables(0).schemaName mustEqual Some("public")

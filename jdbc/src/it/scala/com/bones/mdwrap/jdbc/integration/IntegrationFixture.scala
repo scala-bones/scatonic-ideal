@@ -8,15 +8,16 @@ import org.scalatest.{FixtureTestSuite, Outcome}
 
 abstract class IntegrationFixture extends FixtureAnyFunSuite {
 
-  case class FixtureParam(con: () => Connection)
+  case class FixtureParam(con: Connection)
 
   override def withFixture(test: OneArgTest): Outcome = {
 
     val ds = new PGSimpleDataSource() ;
     ds.setURL("jdbc:postgresql://localhost/postgres?user=travis&password=secret")
-    dropTables(ds.getConnection)
-    createStructures(ds.getConnection)
-    val theFixture = FixtureParam(() => ds.getConnection)
+    val con = ds.getConnection
+    dropTables(con)
+    createStructures(con)
+    val theFixture = FixtureParam(con)
     try {
       withFixture(test.toNoArgTest(theFixture))
     } finally {

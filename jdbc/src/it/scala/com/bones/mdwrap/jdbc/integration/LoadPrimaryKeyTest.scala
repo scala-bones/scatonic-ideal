@@ -3,7 +3,7 @@ package com.bones.mdwrap.jdbc.integration
 import java.sql.Connection
 
 import com.bones.mdwrap.DatabaseQuery
-import com.bones.mdwrap.jdbc.{Borrow, LoadPrimaryKey}
+import com.bones.mdwrap.jdbc.LoadPrimaryKey
 import org.scalatest.matchers.must.Matchers
 
 class LoadPrimaryKeyTest extends IntegrationFixture with Matchers {
@@ -11,12 +11,11 @@ class LoadPrimaryKeyTest extends IntegrationFixture with Matchers {
   test("load primary key") { f =>
 
     val query = DatabaseQuery.everything
-    val borrow = new Borrow[Connection](f.con)
 
-    val primaryKey = LoadPrimaryKey.load(query, borrow)
+    val primaryKey = LoadPrimaryKey.load(query, f.con)
 
-    val a = primaryKey.get.filter(_.tableName == "wrapper_table_a")
-    val b = primaryKey.get.filter(_.tableName == "wrapper_table_b")
+    val a = primaryKey.filter(_.tableName == "wrapper_table_a")
+    val b = primaryKey.filter(_.tableName == "wrapper_table_b")
 
     a(0).catalogName mustEqual None
     a(0).schemaName mustEqual Some("public")
