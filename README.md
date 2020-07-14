@@ -39,11 +39,11 @@ This project provides [Case Class Wrappers for JDBC Database Metadata](https://g
 ```
 
 Supports:
-  Column, CrossReference, PrimaryKey, Table, Schema, ImportedKeys, Function
+  Column, CrossReference, PrimaryKey, Table, Schema, ImportedKeys, Function, TablePrivilege
   
 TODO:
   Attribute (untested because not supported in postgres), 
-  TablePrivilege, TypeInfo, Procedure
+  TypeInfo, Procedure
   
 # Dependency
 

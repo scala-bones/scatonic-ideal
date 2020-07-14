@@ -7,36 +7,35 @@ import com.bones.mdwrap.jdbc.Retrieve.databaseQueryToHierarchyQuery
 
 import scala.util.Try
 
-object LoadTable {
+object LoadTable extends DefaultLoader[Table] {
 
   def loadAdHocTypes(databaseQuery: DatabaseQuery, con: Connection, tableType: String*) =
-    load(databaseQuery, con, tableType.toList)
+    loadCustomTypes(databaseQuery, con, tableType.toList)
 
   def loadTypes(databaseQuery: DatabaseQuery, con: Connection, tableTypes: TableType.Val*) =
-    load(databaseQuery, con, tableTypes.toList.map(_.name))
+    loadCustomTypes(databaseQuery, con, tableTypes.toList.map(_.name))
 
-  def loadAllTypes(databaseQuery: DatabaseQuery, con: Connection) = load(databaseQuery, con, List.empty)
+  def loadAllTypes(databaseQuery: DatabaseQuery, con: Connection) = loadCustomTypes(databaseQuery, con, List.empty)
 
-  def load(databaseQuery: DatabaseQuery, con: Connection, tableTypes: List[String]): List[Table] = {
+
+  override protected def loadFromQuery(databaseQuery: DatabaseQuery, con: Connection): LazyList[ResultSet] =
+    databaseQueryToHierarchyQuery(databaseQuery).to(LazyList).map(param =>
+      con.getMetaData.getTables(param._1.orNull, param._2.orNull, param._3.orNull, null)
+    )
+
+  def loadCustomTypes(databaseQuery: DatabaseQuery, con: Connection, tableTypes: List[String]): List[Table] = {
     val queryParams = databaseQueryToHierarchyQuery(databaseQuery)
     val types = if (tableTypes.isEmpty) null else tableTypes.toArray
     queryParams.flatMap(param => {
       val rs = con.getMetaData.getTables(param._1.orNull, param._2.orNull, param._3.orNull, types)
       try
-        loadAll(rs)
+        loadFromResultSet(rs)
       finally
         rs.close
     }).distinct
   }
 
-  private def loadAll(rs: ResultSet): List[Table] = {
-    new Iterator[Table] {
-      override def hasNext: Boolean = rs.next()
-      override def next(): Table = loadTable(rs)
-    }.toList
-  }
-
-  private def loadTable(rs: ResultSet): Table = {
+  protected def extractRow(rs: ResultSet): Table = {
 
     val tableTypeStr = rs.getString("TABLE_TYPE")
     val tableType = TableType.findByStr(tableTypeStr)

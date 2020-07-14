@@ -5,24 +5,15 @@ import java.sql.{Connection, ResultSet}
 import com.bones.mdwrap.jdbc.Retrieve.databaseQueryToHierarchyQuery
 import com.bones.mdwrap.{DatabaseQuery, PrimaryKey}
 
-object LoadPrimaryKey {
+object LoadPrimaryKey extends DefaultLoader[PrimaryKey] {
 
-  def load(query: DatabaseQuery, con: Connection): List[PrimaryKey] = {
-    databaseQueryToHierarchyQuery(query)
-      .flatMap(q => {
-        val rs = con.getMetaData.getPrimaryKeys(q._1.orNull, q._2.orNull, q._3.orNull)
-        try extractPrimaryKeys(rs) finally rs.close
-      })
-  }
 
-  private def extractPrimaryKeys(rs: ResultSet): List[PrimaryKey] = {
-    new Iterator[PrimaryKey] {
-      override def hasNext: Boolean = rs.next()
-      override def next(): PrimaryKey = loadRow(rs)
-    }.toList
-  }
+  override protected def loadFromQuery(databaseQuery: DatabaseQuery, con: Connection): LazyList[ResultSet] =
+    databaseQueryToHierarchyQuery(databaseQuery).to(LazyList).map(param =>
+      con.getMetaData.getPrimaryKeys(param._1.orNull, param._2.orNull, param._3.orNull)
+    )
 
-  private def loadRow(rs: ResultSet): PrimaryKey = {
+  override protected def extractRow(rs: ResultSet): PrimaryKey = {
     PrimaryKey(
       Option(rs.getString("TABLE_CAT")),
       Option(rs.getString("TABLE_SCHEM")),

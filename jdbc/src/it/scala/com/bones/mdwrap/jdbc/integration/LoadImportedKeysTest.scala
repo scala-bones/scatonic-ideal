@@ -12,7 +12,7 @@ class LoadImportedKeysTest  extends IntegrationFixture with Matchers {
     val query = DatabaseQuery.everything
     val importedKeysMd = LoadImportedKeys.load(query, f.con)
 
-    val importedKeys = importedKeysMd.get.filter(_.primaryKeyTableName == "wrapper_table_a")
+    val importedKeys = importedKeysMd.filter(_.primaryKeyTableName == "wrapper_table_a")
     importedKeys(0).primaryKeyTableCatalogName mustEqual None
     importedKeys(0).primaryKeyTableSchemaName mustEqual Some("public")
     importedKeys(0).primaryKeyTableName mustEqual "wrapper_table_a"

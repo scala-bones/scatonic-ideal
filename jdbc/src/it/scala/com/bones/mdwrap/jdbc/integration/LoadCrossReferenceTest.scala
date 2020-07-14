@@ -12,7 +12,7 @@ class LoadCrossReferenceTest extends IntegrationFixture with Matchers {
     val query = DatabaseQuery.everything
     val crossReferenceTables = LoadCrossReference.load(query, f.con)
 
-    val crossReference = crossReferenceTables.get.filter(_.pkColumnTableName == "wrapper_table_a")
+    val crossReference = crossReferenceTables.filter(_.pkColumnTableName == "wrapper_table_a")
     crossReference(0).pkColumnCatalogName mustEqual None
     crossReference(0).pkColumnSchemaName mustEqual Some("public")
     crossReference(0).pkColumnTableName mustEqual "wrapper_table_a"

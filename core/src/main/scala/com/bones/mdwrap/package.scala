@@ -139,6 +139,10 @@ package object mdwrap {
       else if (str.isEmpty) Some(Unknown)
       else None
     }
+    def findByOptionalString(opt: Option[String]): Option[Value] = opt match {
+      case Some(str) => findByString(str)
+      case None => Some(Unknown)
+    }
     type YesNo = Value
     val Yes, No, Unknown = Value
   }
@@ -258,7 +262,14 @@ package object mdwrap {
     typeName: Option[String],
     selfReferencingColumnName: Option[String],
     referenceGeneration: Option[ReverenceGeneration.Value])
-  case class TablePrivilege()
+  case class TablePrivilege(
+    catalogName: Option[String],
+    schemaName: Option[String],
+    name: String,
+    grantor: Option[String],
+    grantee: String,
+    privilege: String,
+    isGrantable: YesNo.Value)
   case class TypeInfo()
   case class PrimaryKey(
     catalogName: Option[String],
