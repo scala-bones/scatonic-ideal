@@ -1,45 +1,57 @@
 package com.bones.mdwrap.jdbc
 
-import java.sql.{Connection, ResultSet}
+import java.sql.{Connection, ResultSet, SQLException}
 
-import com.bones.mdwrap.{DbAttribute, DataType, DatabaseQuery, Nullable, YesNo}
+import com.bones.mdwrap._
 import com.bones.mdwrap.jdbc.Retrieve.databaseQueryToAttributeQuery
-
-import scala.util.Try
 
 object LoadAttribute {
 
-
-  def load(databaseQuery: DatabaseQuery, borrow: Borrow[Connection]): Try[List[DbAttribute]] = {
+  /** Use the specific DatabaseQuery to load the Attributes */
+  def load(databaseQuery: DatabaseQuery, con: Connection): List[DbAttribute] = {
     val queryParams = databaseQueryToAttributeQuery(databaseQuery)
-    borrow.borrow(con =>
-      Try {
-        queryParams
-          .flatMap(queryParam => {
-            val resultSet = con.getMetaData
-              .getAttributes(queryParam._1.orNull, queryParam._2.orNull, null, queryParam._3.orNull)
-            attributesFromResultSet(resultSet)
-          })
-          .distinct
+    queryParams
+      .flatMap(queryParam => {
+        val resultSet = con.getMetaData
+          .getAttributes(queryParam._1.orNull, queryParam._2.orNull, null, queryParam._3.orNull)
+        try attributesFromResultSet(resultSet)
+        finally resultSet.close()
       })
+      .distinct
   }
 
-  private def attributesFromResultSet(rs: ResultSet): List[DbAttribute] = {
-    val result = new Iterator[DbAttribute] {
+  /**
+    * Accumulates the result from a ResultSet created by the #DatabaseMetadata.getAtrributes() call.
+    *
+    * for exmple:
+    *    load(con.getMetaData.getAttributes(null, null, null, "myAttribute"))
+    *
+    * @param rs The result set to iterate through. Caller is responsible for closing this.
+    * @return
+    * @throws SQLException Propagated from calling the ResultSet methods.
+    */
+  def attributesFromResultSet(rs: ResultSet): List[DbAttribute] = {
+    new Iterator[DbAttribute] {
       def hasNext = rs.next()
       def next() = extractRow(rs)
     }.toList
-    rs.close()
-    result
   }
 
-  private def extractRow(rs: ResultSet) : DbAttribute = {
+  private def extractRow(rs: ResultSet): DbAttribute = {
     val dataTypeInt = req(rs.getInt("DATA_TYPE"))
-    val dataType = DataType.findByConstant(dataTypeInt).getOrElse(throw new IllegalStateException(s"could not find data type with id $dataTypeInt"))
+    val dataType = DataType
+      .findByConstant(dataTypeInt)
+      .getOrElse(throw new IllegalStateException(s"could not find data type with id $dataTypeInt"))
     val nullableInt = req(rs.getInt("NULLABLE"))
-    val nullable = Nullable.findById(nullableInt).getOrElse(throw new IllegalStateException(s"could  not find nullable with id ${nullableInt}"))
+    val nullable = Nullable
+      .findById(nullableInt)
+      .getOrElse(
+        throw new IllegalStateException(s"could  not find nullable with id ${nullableInt}"))
     val isNullableStr = req(rs.getString("IS_NULLABLE"))
-    val isNullable = YesNo.findByString(isNullableStr).getOrElse(throw new IllegalStateException(s"could not fin isNullable with str: $isNullableStr"))
+    val isNullable = YesNo
+      .findByString(isNullableStr)
+      .getOrElse(
+        throw new IllegalStateException(s"could not fin isNullable with str: $isNullableStr"))
     DbAttribute(
       Option(rs.getString("TYPE_CAT")),
       Option(rs.getString("TYPE_SCHEM")),

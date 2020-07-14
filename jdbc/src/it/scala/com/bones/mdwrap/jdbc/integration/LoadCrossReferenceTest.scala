@@ -2,7 +2,7 @@ package com.bones.mdwrap.jdbc.integration
 
 import java.sql.Connection
 
-import com.bones.mdwrap.jdbc.{Borrow, LoadCrossReference}
+import com.bones.mdwrap.jdbc.LoadCrossReference
 import com.bones.mdwrap.{DatabaseQuery, Deferrability, UpdateDeleteRule}
 import org.scalatest.matchers.must.Matchers
 
@@ -10,8 +10,7 @@ class LoadCrossReferenceTest extends IntegrationFixture with Matchers {
 
   test("load cross reference") { f =>
     val query = DatabaseQuery.everything
-    val borrow = new Borrow[Connection](f.con)
-    val crossReferenceTables = LoadCrossReference.load(query, borrow)
+    val crossReferenceTables = LoadCrossReference.load(query, f.con)
 
     val crossReference = crossReferenceTables.get.filter(_.pkColumnTableName == "wrapper_table_a")
     crossReference(0).pkColumnCatalogName mustEqual None

@@ -12,9 +12,8 @@ object LoadImportedKeys {
 
   def load(
             databaseQuery: DatabaseQuery,
-            borrowCon: Borrow[Connection]): Try[List[ImportedKeys]] = {
+            con: Connection): Try[List[ImportedKeys]] = {
     val queryParams = databaseQueryToHierarchyQuery(databaseQuery)
-    borrowCon.borrow(con =>
       Try {
         queryParams
           .flatMap(param => {
@@ -22,21 +21,20 @@ object LoadImportedKeys {
               param._1.orNull,
               param._2.orNull,
               param._3.orNull)
-            importedKeysFromRs(crRs)
-
+            try
+              importedKeysFromRs(crRs)
+            finally
+              crRs.close()
           })
           .distinct
-      })
+      }
   }
 
-  private def importedKeysFromRs(rs: ResultSet): List[ImportedKeys] = {
-    val result = new Iterator[ImportedKeys] {
+  def importedKeysFromRs(rs: ResultSet): List[ImportedKeys] =
+    new Iterator[ImportedKeys] {
       def hasNext: Boolean = rs.next()
       def next(): ImportedKeys = extractRow(rs)
     }.toList
-    rs.close()
-    result
-  }
 
   private def extractRow(rs: ResultSet): ImportedKeys = {
     val updateRuleId = rs.getInt("UPDATE_RULE")

@@ -3,15 +3,14 @@ package com.bones.mdwrap.jdbc.integration
 import java.sql.Connection
 
 import com.bones.mdwrap.{DatabaseQuery, Deferrability, UpdateDeleteRule}
-import com.bones.mdwrap.jdbc.{Borrow, LoadImportedKeys}
+import com.bones.mdwrap.jdbc.LoadImportedKeys
 import org.scalatest.matchers.must.Matchers
 
 class LoadImportedKeysTest  extends IntegrationFixture with Matchers {
 
   test("load imported keys") { f=>
     val query = DatabaseQuery.everything
-    val borrow = new Borrow[Connection](f.con)
-    val importedKeysMd = LoadImportedKeys.load(query, borrow)
+    val importedKeysMd = LoadImportedKeys.load(query, f.con)
 
     val importedKeys = importedKeysMd.get.filter(_.primaryKeyTableName == "wrapper_table_a")
     importedKeys(0).primaryKeyTableCatalogName mustEqual None

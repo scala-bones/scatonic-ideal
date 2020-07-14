@@ -9,23 +9,24 @@ import scala.util.Try
 
 object LoadTable {
 
-  def loadAdHocTypes(databaseQuery: DatabaseQuery, borrow: Borrow[Connection], tableType: String*) =
-    load(databaseQuery, borrow, tableType.toList)
+  def loadAdHocTypes(databaseQuery: DatabaseQuery, con: Connection, tableType: String*) =
+    load(databaseQuery, con, tableType.toList)
 
-  def loadTypes(databaseQuery: DatabaseQuery, borrow: Borrow[Connection], tableTypes: TableType.Val*) =
-    load(databaseQuery, borrow, tableTypes.toList.map(_.name))
+  def loadTypes(databaseQuery: DatabaseQuery, con: Connection, tableTypes: TableType.Val*) =
+    load(databaseQuery, con, tableTypes.toList.map(_.name))
 
-  def loadAllTypes(databaseQuery: DatabaseQuery, borrow: Borrow[Connection]) = load(databaseQuery, borrow, List.empty)
+  def loadAllTypes(databaseQuery: DatabaseQuery, con: Connection) = load(databaseQuery, con, List.empty)
 
-  def load(databaseQuery: DatabaseQuery, borrow: Borrow[Connection], tableTypes: List[String]): Try[List[Table]] = {
+  def load(databaseQuery: DatabaseQuery, con: Connection, tableTypes: List[String]): List[Table] = {
     val queryParams = databaseQueryToHierarchyQuery(databaseQuery)
     val types = if (tableTypes.isEmpty) null else tableTypes.toArray
-    borrow.borrow(con => Try {
-      queryParams.flatMap(param => {
-        val rs = con.getMetaData.getTables(param._1.orNull, param._2.orNull, param._3.orNull, types)
+    queryParams.flatMap(param => {
+      val rs = con.getMetaData.getTables(param._1.orNull, param._2.orNull, param._3.orNull, types)
+      try
         loadAll(rs)
-      }).distinct
-    })
+      finally
+        rs.close
+    }).distinct
   }
 
   private def loadAll(rs: ResultSet): List[Table] = {

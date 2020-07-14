@@ -2,21 +2,17 @@ package com.bones.mdwrap.jdbc
 
 import java.sql.{Connection, ResultSet}
 
-import com.bones.mdwrap.{DatabaseQuery, PrimaryKey}
 import com.bones.mdwrap.jdbc.Retrieve.databaseQueryToHierarchyQuery
-
-import scala.util.Try
+import com.bones.mdwrap.{DatabaseQuery, PrimaryKey}
 
 object LoadPrimaryKey {
 
-  def load(query: DatabaseQuery, borrow: Borrow[Connection]): Try[List[PrimaryKey]] = {
-    borrow.borrow(con => Try {
-      databaseQueryToHierarchyQuery(query)
-        .flatMap(q => {
-          val rs = con.getMetaData.getPrimaryKeys(q._1.orNull, q._2.orNull, q._3.orNull)
-          extractPrimaryKeys(rs)
-        })
-    })
+  def load(query: DatabaseQuery, con: Connection): List[PrimaryKey] = {
+    databaseQueryToHierarchyQuery(query)
+      .flatMap(q => {
+        val rs = con.getMetaData.getPrimaryKeys(q._1.orNull, q._2.orNull, q._3.orNull)
+        try extractPrimaryKeys(rs) finally rs.close
+      })
   }
 
   private def extractPrimaryKeys(rs: ResultSet): List[PrimaryKey] = {

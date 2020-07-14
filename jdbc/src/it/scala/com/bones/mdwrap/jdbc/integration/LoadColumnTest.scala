@@ -1,6 +1,6 @@
 package com.bones.mdwrap.jdbc.integration
 
-import com.bones.mdwrap.jdbc.{Borrow, LoadColumn}
+import com.bones.mdwrap.jdbc.LoadColumn
 import com.bones.mdwrap.{DataType, DatabaseQuery, Nullable, YesNo}
 import org.scalatest.matchers.must.Matchers
 
@@ -9,8 +9,7 @@ class LoadColumnTest extends IntegrationFixture with Matchers {
   test("load public columns") { f =>
     val query = DatabaseQuery.everything.schemas("public")
 
-    val borrow = new Borrow(f.con)
-    val result = LoadColumn.load(query, borrow).get
+    val result = LoadColumn.load(query, f.con)
     val a = result.filter(_.tableName == "wrapper_table_a").toArray
     val b = result.filter(_.tableName == "wrapper_table_b").toArray
 
