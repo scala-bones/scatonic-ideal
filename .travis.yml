@@ -3,23 +3,13 @@ scala:
    - 2.13.2
 services:
   - postgresql
-#  - mysql
 
-before_install:
-  - sudo apt-get update
-  - sudo apt-get --yes remove postgresql\*
-  - sudo apt-get install -y postgresql-11 postgresql-client-11
-  - sudo cp /etc/postgresql/{9.6,11}/main/pg_hba.conf
-  - sudo service postgresql restart 11  
+#before_install:
 #  - mysql -e 'CREATE DATABASE travis_ci_test;'  
+
 before_script:
   - psql --version
   - psql -c 'CREATE DATABASE travis_ci_test;' -U postgres
-#  - psql -c 'CREATE ROLE travis SUPERUSER LOGIN CREATEDB;' -U postgres
-  - cp config/database.yml.travis config/database.yml
-
-addons:
-  postgresql: "11.2"
 
 
 script:

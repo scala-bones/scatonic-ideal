@@ -107,7 +107,9 @@ abstract class IntegrationFixture extends FixtureAnyFunSuite {
     st2.close()
 
     createFunction(con)
-    createProcedure(con)
+
+    // TODO: Get Travis-CI set up with at leat version 11 of Postgres to support procedures
+//    createProcedure(con)
 
 
   }
@@ -127,9 +129,10 @@ abstract class IntegrationFixture extends FixtureAnyFunSuite {
     sf.execute("drop function if exists db_test_add(integer, integer);")
     sf.close()
 
-    val sp = con.createStatement()
-    sp.execute("drop procedure if exists db_test_insert_data(integer, integer)")
-    sp.close()
+// TODO: Get Travis-CI set up with at least version 11 of Postgres to support procedures
+//    val sp = con.createStatement()
+//    sp.execute("drop procedure if exists db_test_insert_data(integer, integer)")
+//    sp.close()
   }
 
 }
