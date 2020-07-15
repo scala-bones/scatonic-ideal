@@ -5,6 +5,9 @@ services:
   - postgresql
 #  - mysql
 
+addons:
+  postgresql: "11"
+
 before_script:
   - psql -c 'create database travis_ci_test;' -U postgres
 
