@@ -3,7 +3,7 @@ scala:
    - 2.13.2
 services:
   - postgresql
-  - mysql
+#  - mysql
 
 before_script:
   - psql -c 'create database travis_ci_test;' -U postgres
@@ -14,4 +14,4 @@ before_install:
 script:
 - sbt test
 - sbt '; set javaOptions += "-Ddb-url=postgresql://postgres:travis@localhost:5432/travis_ci_test" ; jdbc/it:test '
-- sbt '; set javaOptions += "-Ddb-url=mysql://localhost:3306/travis_ci_test" ; jdbc/it:test '
+#- sbt '; set javaOptions += "-Ddb-url=mysql://localhost:3306/travis_ci_test" ; jdbc/it:test '
