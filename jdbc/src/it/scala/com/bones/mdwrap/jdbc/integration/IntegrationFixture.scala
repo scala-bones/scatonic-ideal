@@ -12,8 +12,11 @@ abstract class IntegrationFixture extends FixtureAnyFunSuite {
 
   override def withFixture(test: OneArgTest): Outcome = {
 
+    val dbUrl = Option(System.getProperty("pg-url"))
+      .getOrElse("jdbc:postgresql://localhost/postgres?user=travis&password=secret")
+
     val ds = new PGSimpleDataSource() ;
-    ds.setURL("jdbc:postgresql://localhost/postgres?user=travis&password=secret")
+    ds.setURL(dbUrl)
     val con = ds.getConnection
     dropTables(con)
     createStructures(con)

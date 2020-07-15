@@ -11,17 +11,17 @@ class LoadTableTest extends IntegrationFixture with Matchers {
 
     val allTypes = LoadTable.loadTypes(query, f.con, TableType.Table)
 
-    val tables = allTypes.filter(_.tableType == Right(TableType.Table))
+    val tables = allTypes.filter(_.tableType == Right(TableType.Table)).find(_.name == "wrapper_table_a").head
 
-    tables(0).catalogName mustEqual None
-    tables(0).schemaName mustEqual Some("public")
-    tables(0).name mustEqual "wrapper_table_a"
-    tables(0).tableType mustEqual Right(TableType.Table)
-    tables(0).remarks mustEqual None
-    tables(0).typesSchema mustEqual None
-    tables(0).typeName mustEqual None
-    tables(0).selfReferencingColumnName mustEqual None
-    tables(0).selfReferencingColumnName mustEqual None
+    tables.catalogName mustEqual None
+    tables.schemaName mustEqual Some("public")
+    tables.name mustEqual "wrapper_table_a"
+    tables.tableType mustEqual Right(TableType.Table)
+    tables.remarks mustEqual None
+    tables.typesSchema mustEqual None
+    tables.typeName mustEqual None
+    tables.selfReferencingColumnName mustEqual None
+    tables.selfReferencingColumnName mustEqual None
 
 
   }
