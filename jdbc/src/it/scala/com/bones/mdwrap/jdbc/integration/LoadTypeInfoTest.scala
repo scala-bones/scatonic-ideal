@@ -9,8 +9,6 @@ class LoadTypeInfoTest extends IntegrationFixture with Matchers {
   test("load type info") { f =>
     val typeInfo = LoadTypeInfo.loadAll(f.con)
 
-    typeInfo
-
     val varchar = typeInfo.find(t => t.typeName == "varchar").get
     varchar mustEqual TypeInfo(
       "varchar",
