@@ -10,9 +10,10 @@ services:
 before_script:
   - psql --version
   - psql -c 'CREATE DATABASE travis_ci_test;' -U postgres
+  - psql -c 'CREATE ROLE travis SUPERUSER LOGIN CREATEDB;' -U postgres
 
 
 script:
 - sbt test
-- sbt '; set javaOptions += "-Ddb-url=postgresql://postgres:travis@localhost:5432/travis_ci_test" ; jdbc/it:test '
+- sbt '; set javaOptions += "-Ddb-url=postgresql://travis:travis@localhost:5432/travis_ci_test" ; jdbc/it:test '
 #- sbt '; set javaOptions += "-Ddb-url=mysql://localhost:3306/travis_ci_test" ; jdbc/it:test '
