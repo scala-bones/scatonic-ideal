@@ -128,7 +128,7 @@ abstract class IntegrationFixture extends FixtureAnyFunSuite {
     sf.close()
 
     val sp = con.createStatement()
-    sp.execute("drop procedure if exists db_test_insert_data")
+    sp.execute("drop procedure if exists db_test_insert_data(integer, integer)")
     sp.close()
   }
 
