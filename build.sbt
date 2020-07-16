@@ -2,13 +2,13 @@ lazy val commonSettings = Seq(
   organization := "io.github.scala-bones",
   scalaVersion := "2.13.2",
   version := "0.1.0-SNAPSHOT",
-  homepage := Some(url("https://github.com/scala-bones/db-prototyping")),
+  homepage := Some(url("https://github.com/scala-bones/scatonic-ideal")),
   startYear := Some(2020),
   licenses := Seq("MIT" -> url("http://opensource.org/licenses/MIT")),
   pomExtra := {
     <scm>
-      <url>git://github.com/scala-bones/db-prototyping.git</url>
-      <connection>scm:git://github.com/scala-bones/db-prototyping.git</connection>
+      <url>git://github.com/scala-bones/scatonic-deal.git</url>
+      <connection>scm:git://github.com/scala-bones/scatonic-ideal.git</connection>
     </scm>
     <developers>
       <developer>
@@ -34,7 +34,7 @@ lazy val commonSettings = Seq(
 lazy val core = (project in file("core"))
   .settings(
     commonSettings,
-    name := "db-prototyping",
+    name := "scatonic-ideal",
     libraryDependencies ++= Seq(
       "org.scalatestplus" %% "scalatestplus-scalacheck" % "3.1.0.0-RC2" % Test,
       "org.scalatest" %% "scalatest-mustmatchers" % "3.2.0" % Test
@@ -48,7 +48,7 @@ lazy val jdbc = (project in file("jdbc"))
     Defaults.itSettings,
     commonSettings,
     parallelExecution in IntegrationTest := false,
-    name := "jdbc-db-md-wrapper",
+    name := "jdbc-scatonic-ideal",
     libraryDependencies ++= Seq(
       "org.postgresql" % "postgresql" % "42.2.14" % "test,it",
       "org.scalatest" %% "scalatest" % "3.2.0" % "test,it",
@@ -61,7 +61,7 @@ lazy val doobieVersion = "0.9.0"
 lazy val doobie = (project in file("doobie"))
   .settings(
     commonSettings,
-    name := "jdbc-db-md-wrapper",
+    name := "doobie-scatonic-ideal",
     libraryDependencies ++= Seq(
       "org.tpolecat" %% "doobie-core" % doobieVersion,      
       "org.scalatest" %% "scalatest" % "3.2.0" % Test,
