@@ -19,7 +19,7 @@ Create an "ideal" Schema Prototype (ProtoSchema) using the [Prototype case class
 
 Here is an example which creates a base ideal then updates the db.  Then we make chagnes to the
 ideal and then make changes to the DB again to sync the DB with the idea.
-[Example](core/src/it/scala/com/bones/si/jdbc/ExampleTest.scala)
+[Example](jdbc/src/it/scala/com/bones/si/jdbc/ExampleTest.scala)
 
 Then compare the "ideal" Schema to the database metatdata cache and find the differences between the ideal schema and the cached Database Metadata.
 
