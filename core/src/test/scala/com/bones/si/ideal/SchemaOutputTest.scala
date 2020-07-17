@@ -1,7 +1,6 @@
 package com.bones.si.ideal
 
-import org.scalatest.funspec.AnyFunSpec
-import Fixtures._
+import com.bones.si.ideal.Fixtures._
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.must.Matchers
 
