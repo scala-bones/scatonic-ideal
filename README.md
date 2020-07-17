@@ -1,13 +1,13 @@
 # Overview
 
-Provides the ability to create a Prototype schema in memory 
+Provides the ability to create an Ideal DB schema representation in memory 
 and then compare the prototype schema to an existing schema (using JDBC Database Metadata) to calculate with differences.
 
 This project also provides Case Class wrappers to the JDBC rows returned in DatabaseMetadata ResultSets.
 
 # Prototyping 
 
-Create an "ideal" Schema Prototype (ProtoSchema) using the [Prototype case classes](https://github.com/scala-bones/db-prototyping/blob/master/core/src/main/scala/com/bones/mdwrap/proto/package.scala).
+Create an "ideal" Schema Prototype (ProtoSchema) using the [Prototype case classes](blob/master/core/src/main/scala/com/bones/mdwrap/proto/package.scala).
 
 ```$scala
   case class ProtoColumn(name: String, dataType: DataType.Value, nullable: Boolean, remark: Option[String])
@@ -16,6 +16,10 @@ Create an "ideal" Schema Prototype (ProtoSchema) using the [Prototype case class
   case class ProtoTable(name: String, columns: List[ProtoColumn], foreignKeys: List[ProtoForeignKey], remark: Option[String])
   case class ProtoSchema(name: String, tables: List[ProtoTable])
 ```
+
+Here is an example which creates a base ideal then updates the db.  Then we make chagnes to the
+ideal and then make changes to the DB again to sync the DB with the idea.
+[Example](blab/master/coresrc/it/scala/com/bones/si/jdbc/ExampleTest.scala)
 
 Then compare the "ideal" Schema to the database metatdata cache and find the differences between the ideal schema and the cached Database Metadata.
 
