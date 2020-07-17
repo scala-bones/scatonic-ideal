@@ -30,8 +30,8 @@ class SchemaOutputTest extends AnyFunSuite with Matchers {
                            |alter table public.table1 add column small_int_col smallint;
                            |alter table public.table1 add column time_col_with time with time zone;
                            |alter table public.table1 add column time_col_without time without time zone;
-                           |alter table public.table1 add column timestamp_col_with time with time zone;
-                           |alter table public.table1 add column timestamp_col_without time without time zone;""".stripMargin
+                           |alter table public.table1 add column timestamp_col_with timestamp with time zone;
+                           |alter table public.table1 add column timestamp_col_without timestamp without time zone;""".stripMargin
 
     output.mkString("", ";\n", ";") mustEqual expectedResult
   }
@@ -50,7 +50,7 @@ class SchemaOutputTest extends AnyFunSuite with Matchers {
          |date_col date, double_col double precision, inverval_col interval, long_col bigint,
          |long_auto bigserial not null, numeric_col numeric(10,2), real_col real, small_int_col smallint,
          |time_col_with time with time zone, time_col_without time without time zone,
-         |timestamp_col_with time with time zone, timestamp_col_without time without time zone)""".stripMargin.replaceAll("\n", " ")
+         |timestamp_col_with timestamp with time zone, timestamp_col_without timestamp without time zone)""".stripMargin.replaceAll("\n", " ")
 
   }
 
