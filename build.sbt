@@ -1,7 +1,7 @@
 lazy val commonSettings = Seq(
   organization := "io.github.scala-bones",
   scalaVersion := "2.13.2",
-  version := "0.1.0-SNAPSHOT",
+  version := "0.1.0",
   homepage := Some(url("https://github.com/scala-bones/scatonic-ideal")),
   startYear := Some(2020),
   licenses := Seq("MIT" -> url("http://opensource.org/licenses/MIT")),
