@@ -51,6 +51,7 @@ lazy val jdbc = (project in file("jdbc"))
     name := "jdbc-scatonic-ideal",
     libraryDependencies ++= Seq(
       "org.postgresql" % "postgresql" % "42.2.14" % "test,it",
+      "mysql" % "mysql-connector-java" % "8.0.21" % "test,it",
       "org.scalatest" %% "scalatest" % "3.2.0" % "test,it",
       "org.scalatestplus" %% "scalatestplus-scalacheck" % "3.1.0.0-RC2" % "test,it"
     )

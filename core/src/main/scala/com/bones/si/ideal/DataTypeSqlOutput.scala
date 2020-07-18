@@ -7,25 +7,30 @@ abstract class DataTypeSqlOutput extends DataTypeOutput[String] {
 
   def toCase(string: String): String
 
+  private val NOT_NULL = toCase("not null")
+  private val VARBINARY = toCase("varbinary")
+  private val BINARY = toCase("binary")
+  private val CHARACTER = toCase("character")
+
   override def boolean: String = toCase("boolean")
 
   override def protoColumnOutput(protoColumn: IdealColumn): String = {
-    val nullableStr = if (protoColumn.nullable) "" else toCase(" not null")
+    val nullableStr = if (protoColumn.nullable) "" else " " + NOT_NULL
     s"${protoColumn.name} ${dataTypeOutput(protoColumn.dataType)}${nullableStr}"
   }
 
   override def binary(binaryType: BinaryType): String =
     binaryType.size match {
-      case Some(s) => s"varbinary($s)"
-      case None => "varbinary"
+      case Some(s) => s"$VARBINARY($s)"
+      case None => s"$VARBINARY"
     }
 
   override def fixedLengthBinary(binaryType: FixedLengthBinaryType): String = {
-    s"binary (${binaryType.size})"
+    s"$BINARY (${binaryType.size})"
   }
 
   override def fixedLengthCharacter(fixedLengthCharacterType: FixedLengthCharacterType): String =
-    toCase(s"character(${fixedLengthCharacterType.length})")
+    toCase(s"$CHARACTER(${fixedLengthCharacterType.length})")
 
   override def date: String = toCase("date")
 

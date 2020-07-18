@@ -6,6 +6,7 @@ package com.bones.si.ideal
  */
 trait DataTypeOutput[A] {
 
+  /** Produce output for a specific column.  For instance 'id int8 not null'. */
   def protoColumnOutput(protoColumn: IdealColumn): A
 
   /** Responsible for delegating to the appropriate method based on the data type.*/

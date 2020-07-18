@@ -101,6 +101,7 @@ package object jdbc {
     val Timestamp = Val("Timestamp", Types.TIMESTAMP)
     val Binary = Val("Binary", Types.BINARY)
     val VarBinary = Val("VarBinary", Types.VARBINARY)
+    val LongVarBinary = Val("LongVarBinary", Types.LONGVARBINARY)
     val Null = Val("Null", Types.NULL)
     val Other = Val("Other", Types.OTHER)
     val JavaObject = Val("JavaObject", Types.JAVA_OBJECT)
