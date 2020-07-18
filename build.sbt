@@ -73,4 +73,3 @@ lazy val doobie = (project in file("doobie"))
 */
 
 
-

@@ -1,0 +1,2 @@
+1. Ensure GPG is installed and gpg key is available. (see https://stackoverflow.com/a/55848849/387094)
+2. run publishSigned in sbt.
