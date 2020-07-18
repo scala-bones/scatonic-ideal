@@ -58,7 +58,7 @@ lazy val jdbc = (project in file("jdbc"))
   )
   .dependsOn(core)
 
-lazy val doobieVersion = "0.9.0"
+/*lazy val doobieVersion = "0.9.0"
 lazy val doobie = (project in file("doobie"))
   .settings(
     commonSettings,
@@ -70,6 +70,7 @@ lazy val doobie = (project in file("doobie"))
     )
   )
   .dependsOn(core)
+*/
 
 
 
