@@ -50,7 +50,7 @@ TODO:
   
 # Dependency
 
-```libraryDependencies += "com.github.oletraveler" %% "db-prototyping" % "0.1.0"```
+```libraryDependencies += "io.github.scala-bones" %% "jdbc-scatonic-ideal" % "0.1.0"```
 
 You will need to add one of the supported DB JDBC Drivers, which for now, is Postgres.
 
