@@ -35,10 +35,9 @@ This project also provides [Case Class Wrappers for JDBC Database Metadata](http
 which may be useful outside the context of creating "ideal" schema.
 
 ```$scala
-    val createDbConnection: Connection = ???
+    val con: Connection = ???
     val cacheQuery = DatabaseQuery.everything
-    val borrowConnection = new Borrow[Connection](() => createDbConnection)
-    val cache = LoadDatabaseCache.load(cacheQuery, List.empty, borrowConnection) 
+    val cache = LoadDatabaseCache.load(cacheQuery, List.empty, con) 
 ```
 
 Supports:
