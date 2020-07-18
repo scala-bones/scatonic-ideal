@@ -68,7 +68,8 @@ class ExampleTest extends AnyFunSuite with Matchers {
       val initialDiff = Diff.findDiff(initialCache, schema)
 
       // Create SQL String statements from the diff.
-      val sqls = SchemaOutput.fromDiffResult(initialDiff, "public")
+      val output = PostgresSqlOutput(_.toLowerCase)
+      val sqls = output.statementsFromDiffResult(initialDiff, "public")
 
       // Execute the statements to sync the database with the ideal.
       sqls.foreach(str => {
@@ -103,7 +104,7 @@ class ExampleTest extends AnyFunSuite with Matchers {
       val newDiff = Diff.findDiff(newCache, newSchema)
 
       // create sql statements to reconcile the differences.
-      val updateSqls = SchemaOutput.fromDiffResult(newDiff, "public")
+      val updateSqls = output.statementsFromDiffResult(newDiff, "public")
 
       // sync the database with the new changes.
       updateSqls.foreach(str => {
@@ -116,7 +117,7 @@ class ExampleTest extends AnyFunSuite with Matchers {
       // reload the cache from the database, this will pick up the above changes.
       val finalCache = LoadDatabaseCache.load(query, List.empty, con)
 
-      println(finalCache.toString)
+//      println(finalCache.toString)
 
     } finally {
 

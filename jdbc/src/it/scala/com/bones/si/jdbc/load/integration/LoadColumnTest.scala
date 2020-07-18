@@ -7,7 +7,7 @@ import org.scalatest.matchers.must.Matchers
 class LoadColumnTest extends IntegrationFixture with Matchers {
 
   test("load public columns") { f =>
-    val query = DatabaseQuery.everything.schemas("public")
+    val query = DatabaseQuery.everything.schemas("public").catalogs("test")
 
     val result = LoadColumn.load(query, f.con)
     val a = result.filter(_.tableName == "wrapper_table_a").toArray

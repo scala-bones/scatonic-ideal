@@ -2,72 +2,78 @@ package com.bones.si.ideal
 
 import com.bones.si.ideal.Diff._
 
-object SchemaOutput {
+/**
+ * Responsible for producing Output from a Diff.  In other words, what SQL statements need to
+ * be executed in order for the DB to be in sync with the ideal.
+ */
+class SchemaOutput(toCase: String => String, dataTypeOutput: DataTypeOutput[String]) {
 
-  def fromDiffResult(diffResult: DiffResult, schemaName: String): List[String] = {
-    val output = PostgresSqlOutput(_.toLowerCase())
+  private val PRIMARY_KEY = toCase("primary key")
+  private val FOREIGN_KEY = toCase("foreign key")
+  private val REFERENCES = toCase("references")
+  private val COMMENT_ON_TABLE = toCase("comment on table")
+  private val COMMENT_ON_COLUMN = toCase("comment on column")
+  private val CREATE_TABLE = toCase("create table")
+  private val ALTER_TABLE = toCase("alter table")
+  private val ADD_COLUMN = toCase("add column")
+  private val IS = toCase("is")
+  private val ALTER_COLUMN = toCase("alter column")
+  private val NOT_NULL = toCase("not null")
+  private val DROP = toCase("drop")
+  private val SET = toCase("set")
 
-    val tableSqls = diffResult.tablesMissing.flatMap(SchemaOutput.postgresTableStatement(schemaName, _))
+  /**
+   * Produces sql statements in lower case to create/update tables, columns, primary keys, and foreign keys.
+   * @param diffResult The statements created are based off of this diff.
+   * @param schemaName What schema to create the DB Structures.
+   * @return
+   */
+  def statementsFromDiffResult(diffResult: DiffResult, schemaName: String): List[String] = {
+    val tableSqls = diffResult.tablesMissing.flatMap(createTableOutput(schemaName, _))
     val columnSqls =
-      SchemaOutput.postgresCreateColumnStatements(schemaName, diffResult.columnsMissing)
+      addColumnOutput(schemaName, diffResult.columnsMissing)
     val updateColumnsSqls =
-      diffResult.columnsDifferent.flatMap(c => SchemaOutput.alterColumnOutput(schemaName,c._1.name, (c._2, c._3), output.dataTypeOutput))
+      diffResult.columnsDifferent.flatMap(c =>
+        alterColumnOutput(schemaName, c._1.name, (c._2, c._3)))
 
-     tableSqls ::: columnSqls ::: updateColumnsSqls
-
-  }
-
-  def postgresTableStatement(schemaName: String, protoTable: IdealTable): List[String] = {
-    val output = PostgresSqlOutput(_.toLowerCase())
-    createTableOutput(schemaName, protoTable, output.protoColumnOutput, _.toLowerCase())
-  }
-
-  def postgresCreateColumnStatements(
-    schemaName: String,
-    protoColumns: List[(IdealTable, IdealColumn)]): List[String] = {
-    val output = PostgresSqlOutput(_.toLowerCase())
-    addColumnOutput(schemaName, protoColumns, output.protoColumnOutput)
+    tableSqls ::: columnSqls ::: updateColumnsSqls
   }
 
   def createTableOutput(
     schemaName: String,
-    protoTable: IdealTable,
-    columnAsCreateStatement: IdealColumn => String,
-    toCase: String => String): List[String] = {
+    protoTable: IdealTable): List[String] = {
 
-    val primaryKeys = protoTable.primaryKeyColumns.map(pk => columnAsCreateStatement(pk))
+    val primaryKeys = protoTable.primaryKeyColumns.map(pk => dataTypeOutput.protoColumnOutput(pk))
     val (pkColumnCreate, pkTrailingDef) =
       if (primaryKeys.isEmpty)
         (List.empty, List.empty)
       else if (primaryKeys.length == 1)
-        (primaryKeys.map(_ + toCase(" primary key")), List.empty)
+        (primaryKeys.map(_ + " " + PRIMARY_KEY), List.empty)
       else {
         val keyNames = protoTable.primaryKeyColumns.map(_.name).mkString("(", ", ", ")")
-        (primaryKeys, List(toCase(s"primary key $keyNames")))
+        (primaryKeys, List(s"$PRIMARY_KEY $keyNames"))
       }
 
     val fkColumn = protoTable.foreignKeys.map(fk => {
-      val fkColumn = columnAsCreateStatement(fk.column)
-      val FOREIGN_KEY = toCase("foreign key")
-      val REFERENCES = toCase("references")
+      val fkColumn = dataTypeOutput.protoColumnOutput(fk.column)
       val fkTrailingDef =
         (s"$FOREIGN_KEY (${fk.column.name}) $REFERENCES ${fk.foreignReference._1.name} (${fk.foreignReference._2.name})")
       (fkColumn, fkTrailingDef)
     })
 
     val allColumns =
-      pkColumnCreate ::: protoTable.columns.map(columnAsCreateStatement) ::: fkColumn.map(_._1) ::: pkTrailingDef ::: fkColumn
+      pkColumnCreate ::: protoTable.columns.map(dataTypeOutput.protoColumnOutput) ::: fkColumn.map(_._1) ::: pkTrailingDef ::: fkColumn
         .map(_._2) ::: Nil
 
     val remark = protoTable.remark
-      .map(remark => s"comment on table $schemaName.${protoTable.name} is '$remark'")
+      .map(remark => s"$COMMENT_ON_TABLE $schemaName.${protoTable.name} $IS '$remark'")
       .toList
 
     val columnRemarks = protoTable.allColumns.flatMap(c => c.remark.map(rem => (c.name, rem))).map {
-      case (cName, rem) => s"comment on column $schemaName.${protoTable.name}.${cName} is '$rem'"
+      case (cName, rem) => s"$COMMENT_ON_COLUMN $schemaName.${protoTable.name}.${cName} $IS '$rem'"
     }
 
-    val tableSql = s"""create table $schemaName.${protoTable.name} (${allColumns.mkString(", ")})"""
+    val tableSql = s"""$CREATE_TABLE $schemaName.${protoTable.name} (${allColumns.mkString(", ")})"""
 
     tableSql :: remark ::: columnRemarks
 
@@ -75,14 +81,13 @@ object SchemaOutput {
 
   def addColumnOutput(
     schemaName: String,
-    columns: List[(IdealTable, IdealColumn)],
-    columnAsUpdateStatement: IdealColumn => String): List[String] = {
+    columns: List[(IdealTable, IdealColumn)]): List[String] = {
     val columnSql = columns.map {
       case (table, column) =>
-        s"alter table $schemaName.${table.name} add column ${columnAsUpdateStatement(column)}"
+        s"$ALTER_TABLE $schemaName.${table.name} $ADD_COLUMN ${dataTypeOutput.protoColumnOutput(column)}"
     }
     val commentSql = columns.flatMap(x => x._2.remark.map( (x, _))).map(rem => {
-      s"comment on column $schemaName.${rem._1._1.name}.${rem._1._2.name} is '${rem._2}'"
+      s"$COMMENT_ON_COLUMN $schemaName.${rem._1._1.name}.${rem._1._2.name} $IS '${rem._2}'"
     })
     columnSql ::: commentSql
   }
@@ -90,16 +95,15 @@ object SchemaOutput {
   def alterColumnOutput(
     schemaName: String,
     tableName: String,
-    columnDiff: (IdealColumn, List[ColumnDiff]),
-    f: IdealDataType => String): List[String] = {
+    columnDiff: (IdealColumn, List[ColumnDiff])): List[String] = {
     columnDiff._2.map {
       case ColumnDataTypeDiff(_, _) =>
-        s"alter table $schemaName.$tableName alter column ${columnDiff._1.name} ${f(columnDiff._1.dataType)}"
+        s"$ALTER_TABLE $schemaName.$tableName $ALTER_COLUMN ${columnDiff._1.name} ${dataTypeOutput.dataTypeOutput(columnDiff._1.dataType)}"
       case ColumnRemarkDiff(_, _) =>
-        s"comment on column $schemaName.$tableName.${columnDiff._1.name} is '${columnDiff._1.remark.getOrElse("")}'"
+        s"$COMMENT_ON_COLUMN $schemaName.$tableName.${columnDiff._1.name} $IS '${columnDiff._1.remark.getOrElse("")}'"
       case ColumnNullableDiff(_, _) =>
-        val setDrop = if (columnDiff._1.nullable) "drop" else "set"
-        s"alter table $schemaName.$tableName alter column $setDrop not null"
+        val setDrop = if (columnDiff._1.nullable) DROP else SET
+        s"$ALTER_TABLE $schemaName.$tableName $ALTER_COLUMN $setDrop $NOT_NULL"
     }
   }
 
