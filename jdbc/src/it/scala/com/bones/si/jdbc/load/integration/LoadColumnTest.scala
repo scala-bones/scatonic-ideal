@@ -12,6 +12,7 @@ class LoadColumnTest extends IntegrationFixture with Matchers {
     val result = LoadColumn.load(query, f.con)
     val a = result.filter(_.tableName == "wrapper_table_a").toArray
     val b = result.filter(_.tableName == "wrapper_table_b").toArray
+    val ar = result.filter(_.tableName == "b").toArray
 
 
     a(0).catalogName mustEqual None

@@ -8,9 +8,10 @@ import java.nio.charset.{Charset, StandardCharsets}
 package object ideal {
 
   sealed trait IdealDataType
+  case class ArrayType(arrayOf: IdealDataType) extends IdealDataType
   object  BinaryType {
     def apply(size: Int): BinaryType = BinaryType(Some(size))
-    def apply(): BinaryType = BinaryType(None)
+    val unbounded: BinaryType = BinaryType(None)
   }
   case class BinaryType(size: Option[Int]) extends IdealDataType
   case object BooleanType extends IdealDataType
@@ -83,6 +84,7 @@ package object ideal {
   object IdealTable {
     def apply(name: String, primaryKey: IdealColumn, columns: List[IdealColumn], foreignKeys: List[IdealForeignKey] = List.empty, remark: Option[String] = None): IdealTable =
       IdealTable(name, List(primaryKey), columns, foreignKeys, remark)
+    def empty(name: String, description: Option[String] = None) = IdealTable(name, List.empty, List.empty, List.empty, description)
   }
 
   /**

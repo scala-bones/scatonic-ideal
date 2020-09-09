@@ -204,6 +204,41 @@ object Diff {
   }
 
   /**
+   * Check the ideal type of the array compared to the metadata.  Most of the
+   * time we can ensure the sizes match (such as varchar(50) == string bounded to 50 characters)
+   * but in a few cases we can not compare the upper bound.  In this case we say the
+   * two are equivalent if the metadata size is greater than the ideal size.
+   * TODO: This is most certainly PostgreSQL specific.
+   * @param dataType The ideal type of the data in the array
+   * @param column The jdbc metadata column
+   * @return If the column is equivalent to the data type.
+   */
+  protected def checkArray(dataType: IdealDataType, column: Column): Boolean = {
+    (dataType, column.typeName) match {
+      case (BinaryType(Some(size)), "_bit") if size == 1 => column.columnSize == 1
+      case (SmallIntType, "_int2") => true
+      case (StringType(size, _), "_text") => size.forall(column.columnSize >= _)
+      case (StringType(size, _), "_varchar") => size.contains(size)
+      case (IntegerType(_), "_int4") => true
+      case (LongType(_), "_int8") => true
+      case (RealType, "_float4") => true
+      case (DoubleType, "_float8") => true
+      case (NumericType(precision,scale), "_numeric") =>
+        precision == column.columnSize && column.decimalDigits.contains(scale)
+      case (DateType, "_date") => true
+      case (TimestampType(tz), "_timestamp") if !tz => true
+      case (TimestampType(tz), "_timestampz") if tz => true
+      case (TimeType(tz), "_time") if !tz => true
+      case (TimeType(tz), "_timez") if tz => true
+      case (FixedLengthBinaryType(size), "_varbit") => column.columnSize > size // Postgres metadata columnSize doesn't reflect the bounded size
+      case (BinaryType(size), "_bytea") => size.forall(column.columnSize > _)
+      case (BooleanType, "_bool") => true
+      case (FixedLengthCharacterType(size, _), "_bpchar") =>column.columnSize == size
+      case _ => false
+    }
+  }
+
+  /**
     * Goal is to determine if the JDBC type satisfies the specified DataType for the ProtoColumn
     * @param idealDataType What the data type should be.
     * @param dataType What the data type is in the cache.
@@ -215,6 +250,7 @@ object Diff {
     dataType: DataType.Value,
     column: Column): Boolean = {
     (idealDataType, dataType) match {
+      case (ArrayType(arrayOf), DataType.Array) => checkArray(arrayOf, column)
       case (BinaryType(size), DataType.Bit) if size.contains(1) => true
       case (SmallIntType, DataType.TinyInt)                     => true
       case (SmallIntType, DataType.SmallInt)                    => true
@@ -247,17 +283,17 @@ object Diff {
       case (FixedLengthBinaryType(size), DataType.Binary) =>
         column.columnSize == size
       case (BinaryType(size), DataType.Blob) =>
-        size.forall(column.columnSize > _)
+        size.forall(column.columnSize >= _)
       case (StringType(size, _), DataType.Clob) =>
-        size.forall(column.columnSize > _)
+        size.forall(column.columnSize >= _)
       case (BooleanType, DataType.Boolean)                           => true
       case (FixedLengthCharacterType(size, charset), DataType.NChar) => true
       case (StringType(size, _), DataType.NVarChar) =>
-        size.forall(column.columnSize > _)
+        size.forall(column.columnSize >= _)
       case (StringType(size, _), DataType.LongNVarChar) =>
         size.forall(column.columnSize > _)
       case (StringType(size, _), DataType.NClob) =>
-        size.forall(column.columnSize > _)
+        size.forall(column.columnSize >= _)
       case (TimeType(tz), DataType.TimeWithTimeZone) if tz           => true
       case (TimestampType(tz), DataType.TimestampWithTimeZone) if tz => true
       case _                                                         => false
