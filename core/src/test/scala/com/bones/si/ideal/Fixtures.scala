@@ -178,7 +178,7 @@ object Fixtures {
   val table3Columns = List(
     IdealColumn("binary_one", BinaryType(1), true, None),
     IdealColumn("binary_hundo", BinaryType(100), true, None),
-    IdealColumn("binary_unfixed", BinaryType(), true, None),
+    IdealColumn("binary_unfixed", BinaryType.unbounded, true, None),
     IdealColumn("boolean_col", BooleanType, true, None),
     IdealColumn("fixed_binary", FixedLengthBinaryType(100), true, None),
     IdealColumn("fixed_char", FixedLengthCharacterType(100, StandardCharsets.UTF_8), true, None),
@@ -205,7 +205,7 @@ object Fixtures {
   val columnCreate = List(
     IdealColumn("binary_one", BinaryType(1), true, None),
     IdealColumn("binary_hundo", BinaryType(100), true, None),
-    IdealColumn("binary_unfixed", BinaryType(), true, None),
+    IdealColumn("binary_unfixed", BinaryType.unbounded, true, None),
     IdealColumn("boolean_col", BooleanType, true, None),
     IdealColumn("fixed_binary", FixedLengthBinaryType(100), true, None),
     IdealColumn("fixed_char", FixedLengthCharacterType(100, StandardCharsets.UTF_8), true, None),

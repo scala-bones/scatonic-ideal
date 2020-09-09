@@ -12,6 +12,7 @@ trait DataTypeOutput[A] {
   /** Responsible for delegating to the appropriate method based on the data type.*/
   def dataTypeOutput(dataType: IdealDataType): A = {
     dataType match {
+      case a: ArrayType => array(a)
       case b: BinaryType => binary(b)
       case BooleanType => boolean
       case f: FixedLengthBinaryType => fixedLengthBinary(f)
@@ -30,6 +31,7 @@ trait DataTypeOutput[A] {
     }
   }
 
+  def array(arrayType: ArrayType): A
   def binary(binaryType: BinaryType): A
   def boolean: A
   def fixedLengthBinary(binaryType: FixedLengthBinaryType): A

@@ -17,6 +17,10 @@ case class DataTypePostgresSqlOutput(toCaseFunction: String => String) extends D
   private val VARCHAR = toCase("varchar")
   private val TEXT = toCase("text")
 
+  override def array(arrayType: ArrayType): String = {
+    s"${this.dataTypeOutput(arrayType.arrayOf)}[]"
+  }
+
   override def binary(binaryType: BinaryType): String =
     if (binaryType.size.contains(1)) BIT else BYTEA
 
