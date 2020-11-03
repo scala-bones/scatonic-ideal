@@ -25,6 +25,11 @@ object Diff {
   case class ColumnNullableDiff(existingNullable: YesNo.Value, newNullable: YesNo.Value)
       extends ColumnDiff
 
+  /**
+   * When the 'ideal' unique constraint is different then the DB cache
+   */
+  case class UniqueDiff(columnGroup: List[IdealColumn])
+
   /** When there are missing or extranious Primary Keys between the 'ideal' and the DB Cache
     * @param missing The list of missing PrimaryKeys.
     * @param extraneousKeys The list of primary keys in the DB Cache which are not listed in the 'ideal'.
@@ -46,7 +51,8 @@ object Diff {
     columnsDifferent: List[(IdealTable, IdealColumn, List[ColumnDiff])],
     primaryKeysMissing: List[(IdealTable, IdealColumn)],
     primaryKeysExtraneous: List[(IdealTable, PrimaryKey)],
-    missingForeignKeys: List[IdealForeignKey])
+    missingForeignKeys: List[IdealForeignKey],
+    uniqueDiffs: List[(IdealTable, UniqueDiff)])
 
   /**
     * Give a database Cache and a Schema Prototype, find the list of changes needed to be made
@@ -79,7 +85,8 @@ object Diff {
       }
 
     val columnDiff = missingExistingColumns._2.flatMap(c => {
-      val diff = compareColumn(c._2, c._3)
+      val indexInfos = databaseCache.indexInfos.filter(i => i.columnName.contains(c._2.name) && i.tableName == c._1.name)
+      val diff = compareColumn(c._2, c._3, indexInfos)
       if (diff.isEmpty) None
       else Some((c._1, c._2, diff))
     })
@@ -89,13 +96,18 @@ object Diff {
       (diff.missing.map((table._1, _)), diff.extraneousKeys.map((table._1, _)))
     })
 
+    val uniqueConstraintDiff = existingTables.flatMap(table => {
+      findUniqueConstraintDifferences(databaseCache, protoSchema.name, table._1).map( (table._1, _))
+    })
+
     DiffResult(
       missingTables,
       missingExistingColumns._1,
       columnDiff,
       primaryKeyDifference.flatMap(_._1),
       primaryKeyDifference.flatMap(_._2),
-      List.empty[IdealForeignKey])
+      List.empty[IdealForeignKey],
+      uniqueConstraintDiff)
 
   }
 
@@ -150,6 +162,17 @@ object Diff {
       PrimaryKeyDiff(List.empty, extraneous)
   }
 
+  def findUniqueConstraintDifferences(databaseCache: DatabaseMetadataCache, schemaName: String, table: IdealTable): List[UniqueDiff] = {
+    val tableIndexes = databaseCache.indexInfos.filter(ii => ii.tableName == table.name && ii.tableSchema.contains(schemaName))
+    val grouped = tableIndexes.groupBy(_.indexName)
+    val missingConstraint = table.uniqueConstraints.filterNot(uc => {
+      val columnNames = uc.uniqueGroup.map(_.name).toSet
+      //see if there is an unique constraint which contains the column group and only the column group
+      grouped.values.exists(_.flatMap(_.columnName).toSet == columnNames)
+    })
+    missingConstraint.map(uc => UniqueDiff(uc.uniqueGroup))
+  }
+
   def findPrimaryKeyDifferences(
     databaseCache: DatabaseMetadataCache,
     schemaName: String,
@@ -184,7 +207,7 @@ object Diff {
     * @param diffColumn The cached column for comparison
     * @return List of differences
     */
-  def compareColumn(column: IdealColumn, diffColumn: Column): List[ColumnDiff] = {
+  def compareColumn(column: IdealColumn, diffColumn: Column, indexInfos: List[IndexInfo]): List[ColumnDiff] = {
     val dt =
       if (!isEquivalent(column.dataType, diffColumn.dataType, diffColumn))
         List(ColumnDataTypeDiff(diffColumn.dataType, column.dataType))
@@ -193,12 +216,13 @@ object Diff {
       if (column.remark != diffColumn.remarks)
         List(ColumnRemarkDiff(diffColumn.remarks, column.remark))
       else List.empty
-    val nl =
+    val nl = {
       if (diffColumn.isNullable == YesNo.Unknown ||
           (column.nullable && diffColumn.isNullable == YesNo.No) ||
           (!column.nullable && diffColumn.isNullable == YesNo.Yes))
         List(ColumnNullableDiff(diffColumn.isNullable, YesNo.fromBoolean(column.nullable)))
       else List.empty
+    }
 
     dt ::: rm ::: nl ::: Nil
   }

@@ -26,7 +26,7 @@ abstract class DefaultLoader[A] {
    * @param resultSet Used to extract the row
    * @return The extracted row into the wrapped dataset.
    * @throws MissingDataException can be used when there is missing or incorrect data.
-   * @throws java.sql.SQLException - This method should just let the SQLException propogate up.
+   * @throws java.sql.SQLException - This method should just let the SQLException propagated up.
    */
   protected def extractRow(resultSet: ResultSet): A
 

@@ -69,6 +69,8 @@ package object ideal {
    */
   case class IdealForeignKey(column: IdealColumn, foreignReference: (IdealTable, IdealColumn))
 
+  case class UniqueConstraint(uniqueGroup: List[IdealColumn])
+
   /**
    * Represents an 'ideal' table.
    * @param name Name of the table.
@@ -77,14 +79,15 @@ package object ideal {
    * @param foreignKeys A list of the foreign key constraints reference from this table.
    * @param remark A comment about the table.
    */
-  case class IdealTable(name: String, primaryKeyColumns: List[IdealColumn], columns: List[IdealColumn], foreignKeys: List[IdealForeignKey], remark: Option[String]) {
+  case class IdealTable(name: String, primaryKeyColumns: List[IdealColumn], columns: List[IdealColumn], foreignKeys: List[IdealForeignKey], uniqueConstraints: List[UniqueConstraint], remark: Option[String]) {
     /** combines columns, primary key columns and foreign key columns */
     def allColumns: List[IdealColumn] = primaryKeyColumns ::: columns ::: foreignKeys.map(_.column)
+
   }
   object IdealTable {
-    def apply(name: String, primaryKey: IdealColumn, columns: List[IdealColumn], foreignKeys: List[IdealForeignKey] = List.empty, remark: Option[String] = None): IdealTable =
-      IdealTable(name, List(primaryKey), columns, foreignKeys, remark)
-    def empty(name: String, description: Option[String] = None) = IdealTable(name, List.empty, List.empty, List.empty, description)
+    def apply(name: String, primaryKey: IdealColumn, columns: List[IdealColumn], foreignKeys: List[IdealForeignKey] = List.empty, uniqueConstraints: List[UniqueConstraint] = List.empty, remark: Option[String] = None): IdealTable =
+      IdealTable(name, List(primaryKey), columns, foreignKeys, uniqueConstraints, remark)
+    def empty(name: String, description: Option[String] = None): IdealTable = IdealTable(name, List.empty, List.empty, List.empty, List.empty, description)
   }
 
   /**

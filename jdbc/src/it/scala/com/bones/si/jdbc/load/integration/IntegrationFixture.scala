@@ -152,6 +152,8 @@ abstract class IntegrationFixture extends FixtureAnyFunSuite {
         | timestamp_col TIMESTAMP,
         | timestamp_with_timezone_col TIMESTAMP WITH TIME ZONE,
         | xml_col XML,
+        | UNIQUE(name),
+        | UNIQUE(double_col, integer_col),
         | PRIMARY KEY(id, big_id) )
         |
         |""".stripMargin

@@ -3,7 +3,7 @@ package com.bones.si.ideal
 import java.nio.charset.StandardCharsets
 
 import com.bones.si.jdbc.load.{DatabaseMetadataCache, DatabaseQuery}
-import com.bones.si.jdbc.{Column, DataType, Nullable, PrimaryKey, Table, TableType, YesNo}
+import com.bones.si.jdbc.{AscDesc, Column, DataType, IndexInfo, IndexType, Nullable, PrimaryKey, Table, TableType, YesNo}
 
 object Fixtures {
   val tables = List(
@@ -155,6 +155,7 @@ object Fixtures {
   val pks = List(table1Pk, table2Pk)
 
 //  val crossRef = CrossReference(None, Some("public"), "table2", )
+  val indexInfo = IndexInfo(None, Some("public"), "table1", false, None, "id_idx", IndexType.tableIndexOther, 1, Some("id"), Some(AscDesc.asc), 1, 1, None)
 
   val databaseCache = DatabaseMetadataCache.apply(
     DatabaseQuery.everything,
@@ -162,13 +163,15 @@ object Fixtures {
     tables,
     columns,
     List.empty,
-    pks)
+    pks,
+    List(indexInfo))
 
   val table1Pks = List(IdealColumn("id", IntegerType.autoIncrement, false, None))
   val table1Columns = List(
     IdealColumn("name", StringType.unbounded, false, None),
     IdealColumn("age", IntegerType(), true, None)
   )
+  val table1Unique = List(UniqueConstraint(table1Pks))
   val table2Pks = List(IdealColumn("id", IntegerType.autoIncrement, false, None))
   val table2Columns = List(
     IdealColumn("table1_id", IntegerType(), false, None),
@@ -196,9 +199,9 @@ object Fixtures {
     IdealColumn("timestamp_col_without", TimestampType.withoutTimeZone(), true, None)
   )
 
-  val table1 = IdealTable("table1", table1Pks, table1Columns, List.empty, None)
-  val table2 = IdealTable("table2", table2Pks, table2Columns, List.empty, None)
-  val table3 = IdealTable("table3", List.empty, table3Columns, List.empty, None)
+  val table1 = IdealTable("table1", table1Pks, table1Columns, List.empty, List.empty, None)
+  val table2 = IdealTable("table2", table2Pks, table2Columns, List.empty, List.empty, None)
+  val table3 = IdealTable("table3", List.empty, table3Columns, List.empty, List.empty, None)
 
   val schema = IdealSchema("public", List(table1, table2))
 

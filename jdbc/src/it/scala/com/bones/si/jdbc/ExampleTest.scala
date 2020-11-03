@@ -73,6 +73,7 @@ class ExampleTest extends AnyFunSuite with Matchers {
 
       // Execute the statements to sync the database with the ideal.
       sqls.foreach(str => {
+//        println(str)
         val statement = con.createStatement()
         statement.execute(str)
         statement.close
@@ -87,7 +88,7 @@ class ExampleTest extends AnyFunSuite with Matchers {
         IntegerType(),
         true,
         Some("scale of 1 - 5, how satisfied was the customer with the order"))
-      val newTable2 = table2.copy(columns = newColumn :: table2.columns)
+      val newTable2 = table2.copy(columns = newColumn :: table2.columns).copy(uniqueConstraints = List(UniqueConstraint(table2.columns)))
 
       val table3Pk =
         IdealColumn("id", IntegerType.autoIncrement, false, Some("the id of the correspondence"))
@@ -95,7 +96,8 @@ class ExampleTest extends AnyFunSuite with Matchers {
         IdealColumn("title", StringType(255), true, Some("The title of the correspondence")),
         IdealColumn("body", StringType.unbounded, false, Some("the body of the correspondence"))
       )
-      val table3 = IdealTable("correspondence", table3Pk, table3columns)
+      val table3Unique = UniqueConstraint(table3columns)
+      val table3 = IdealTable("correspondence", table3Pk, table3columns, List.empty, List(table3Unique), None)
 
       // This is our new ideal schema
       val newSchema = IdealSchema("public", List(table1, newTable2, table3))
@@ -106,8 +108,10 @@ class ExampleTest extends AnyFunSuite with Matchers {
       // create sql statements to reconcile the differences.
       val updateSqls = output.statementsFromDiffResult(newDiff, "public")
 
+//      println("UPDATE STATEMENTS")
       // sync the database with the new changes.
       updateSqls.foreach(str => {
+//        println(str)
         val statement = con.createStatement()
         statement.execute(str)
         statement.close
