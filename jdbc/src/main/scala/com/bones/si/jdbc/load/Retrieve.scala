@@ -8,7 +8,8 @@ object Retrieve {
   case class Hierarchy(
     catalogName: Option[String],
     schemaName: Option[String],
-    tableName: Option[String])
+    tableName: Option[String]
+  )
 
   private def catalogQuery(query: DatabaseQuery) =
     if (query.catalogNames.isEmpty) List(None) else query.catalogNames.map(Some(_))
@@ -17,7 +18,8 @@ object Retrieve {
     if (query.schemaNames.isEmpty) List(None) else query.schemaNames.map(Some(_))
 
   def databaseQueryToHierarchyQuery(
-    query: DatabaseQuery): List[(Option[String], Option[String], Option[String])] = {
+    query: DatabaseQuery
+  ): List[(Option[String], Option[String], Option[String])] = {
     val catalogs = catalogQuery(query)
     val schemas = schemaQuery(query)
     val tables = if (query.tableNames.isEmpty) List(None) else query.tableNames.map(Some(_))
@@ -29,7 +31,8 @@ object Retrieve {
   }
 
   def databaseQueryToProcedureQuery(
-                                     query: DatabaseQuery): List[(Option[String], Option[String], Option[String])] = {
+    query: DatabaseQuery
+  ): List[(Option[String], Option[String], Option[String])] = {
     val catalogs = catalogQuery(query)
     val schemas = schemaQuery(query)
     val procedures =
@@ -43,7 +46,8 @@ object Retrieve {
   }
 
   def databaseQueryToFunctionQuery(
-    query: DatabaseQuery): List[(Option[String], Option[String], Option[String])] = {
+    query: DatabaseQuery
+  ): List[(Option[String], Option[String], Option[String])] = {
     val catalogs = catalogQuery(query)
     val schemas = schemaQuery(query)
     val functions =
@@ -57,7 +61,8 @@ object Retrieve {
   }
 
   def databaseQueryToAttributeQuery(
-    query: DatabaseQuery): List[(Option[String], Option[String], Option[String])] = {
+    query: DatabaseQuery
+  ): List[(Option[String], Option[String], Option[String])] = {
     val catalogs = catalogQuery(query)
     val schemas = schemaQuery(query)
     val attributes =

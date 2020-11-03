@@ -28,7 +28,7 @@ lazy val commonSettings = Seq(
       Some("releases" at nexus + "service/local/staging/deploy/maven2")
   },
   publishMavenStyle := true,
-  addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.0" cross CrossVersion.full),
+  addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.0" cross CrossVersion.full)
 )
 
 lazy val core = (project in file("core"))
@@ -64,12 +64,10 @@ lazy val doobie = (project in file("doobie"))
     commonSettings,
     name := "doobie-scatonic-ideal",
     libraryDependencies ++= Seq(
-      "org.tpolecat" %% "doobie-core" % doobieVersion,      
+      "org.tpolecat" %% "doobie-core" % doobieVersion,
       "org.scalatest" %% "scalatest" % "3.2.0" % Test,
       "org.scalatestplus" %% "scalatestplus-scalacheck" % "3.1.0.0-RC2" % Test
     )
   )
   .dependsOn(core)
-*/
-
-
+ */

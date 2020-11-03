@@ -12,24 +12,34 @@ object LoadTable extends DefaultLoader[Table] {
   def loadTypes(databaseQuery: DatabaseQuery, con: Connection, tableTypes: TableType.Val*) =
     loadCustomTypes(databaseQuery, con, tableTypes.toList.map(_.name))
 
-  def loadAllTypes(databaseQuery: DatabaseQuery, con: Connection) = loadCustomTypes(databaseQuery, con, List.empty)
+  def loadAllTypes(databaseQuery: DatabaseQuery, con: Connection) =
+    loadCustomTypes(databaseQuery, con, List.empty)
 
+  override protected def loadFromQuery(
+    databaseQuery: DatabaseQuery,
+    con: Connection
+  ): LazyList[ResultSet] =
+    Retrieve
+      .databaseQueryToHierarchyQuery(databaseQuery)
+      .to(LazyList)
+      .map(param =>
+        con.getMetaData.getTables(param._1.orNull, param._2.orNull, param._3.orNull, null)
+      )
 
-  override protected def loadFromQuery(databaseQuery: DatabaseQuery, con: Connection): LazyList[ResultSet] =
-    Retrieve.databaseQueryToHierarchyQuery(databaseQuery).to(LazyList).map(param =>
-      con.getMetaData.getTables(param._1.orNull, param._2.orNull, param._3.orNull, null)
-    )
-
-  def loadCustomTypes(databaseQuery: DatabaseQuery, con: Connection, tableTypes: List[String]): List[Table] = {
+  def loadCustomTypes(
+    databaseQuery: DatabaseQuery,
+    con: Connection,
+    tableTypes: List[String]
+  ): List[Table] = {
     val queryParams = Retrieve.databaseQueryToHierarchyQuery(databaseQuery)
     val types = if (tableTypes.isEmpty) null else tableTypes.toArray
-    queryParams.flatMap(param => {
-      val rs = con.getMetaData.getTables(param._1.orNull, param._2.orNull, param._3.orNull, types)
-      try
-        loadFromResultSet(rs)
-      finally
-        rs.close
-    }).distinct
+    queryParams
+      .flatMap(param => {
+        val rs = con.getMetaData.getTables(param._1.orNull, param._2.orNull, param._3.orNull, types)
+        try loadFromResultSet(rs)
+        finally rs.close
+      })
+      .distinct
   }
 
   protected def extractRow(rs: ResultSet): Table = {

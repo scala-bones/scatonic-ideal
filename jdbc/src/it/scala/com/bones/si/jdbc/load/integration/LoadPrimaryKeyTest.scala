@@ -6,7 +6,6 @@ import org.scalatest.matchers.must.Matchers
 class LoadPrimaryKeyTest extends IntegrationFixture with Matchers {
 
   test("load primary key") { f =>
-
     val query = DatabaseQuery.everything
 
     val primaryKey = LoadPrimaryKey.load(query, f.con)
@@ -30,8 +29,6 @@ class LoadPrimaryKeyTest extends IntegrationFixture with Matchers {
     b(0).columnName mustEqual "id"
     b(0).keySequence mustEqual 1
     b(0).name mustEqual Some("wrapper_table_b_pkey")
-
-
 
   }
 }

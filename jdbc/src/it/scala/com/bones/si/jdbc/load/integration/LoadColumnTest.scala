@@ -14,7 +14,6 @@ class LoadColumnTest extends IntegrationFixture with Matchers {
     val b = result.filter(_.tableName == "wrapper_table_b").toArray
     val ar = result.filter(_.tableName == "b").toArray
 
-
     a(0).catalogName mustEqual None
     a(0).schemaName mustEqual Some("public")
     a(0).tableName mustEqual "wrapper_table_a"
@@ -45,7 +44,6 @@ class LoadColumnTest extends IntegrationFixture with Matchers {
     a(3).columnSize mustEqual 5
     a(3).isNullable mustEqual YesNo.Yes
     a(3).nullable mustEqual Nullable.ColumnNullable
-
 
     a(4).dataType mustEqual DataType.VarChar
     a(4).typeName mustEqual "text"
@@ -100,7 +98,6 @@ class LoadColumnTest extends IntegrationFixture with Matchers {
 
     b(1).dataType mustEqual DataType.Integer
     b(1).typeName mustEqual "int4"
-
 
   }
 }

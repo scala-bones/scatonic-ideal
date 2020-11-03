@@ -6,7 +6,7 @@ import org.scalatest.matchers.must.Matchers
 
 class LoadFunctionTest extends IntegrationFixture with Matchers {
 
-  test ("can load functions" ) { f=>
+  test("can load functions") { f =>
     val query = DatabaseQuery.everything
     val functions = LoadFunction.load(query, f.con)
 

@@ -3,7 +3,18 @@ package com.bones.si.ideal
 import java.nio.charset.StandardCharsets
 
 import com.bones.si.jdbc.load.{DatabaseMetadataCache, DatabaseQuery}
-import com.bones.si.jdbc.{AscDesc, Column, DataType, IndexInfo, IndexType, Nullable, PrimaryKey, Table, TableType, YesNo}
+import com.bones.si.jdbc.{
+  AscDesc,
+  Column,
+  DataType,
+  IndexInfo,
+  IndexType,
+  Nullable,
+  PrimaryKey,
+  Table,
+  TableType,
+  YesNo
+}
 
 object Fixtures {
   val tables = List(
@@ -17,7 +28,8 @@ object Fixtures {
       None,
       None,
       None,
-      None),
+      None
+    ),
     Table(
       None,
       Some("public"),
@@ -28,7 +40,8 @@ object Fixtures {
       None,
       None,
       None,
-      None)
+      None
+    )
   )
 
   val columns = List(
@@ -70,7 +83,8 @@ object Fixtures {
       YesNo.No,
       None,
       YesNo.Yes,
-      YesNo.No),
+      YesNo.No
+    ),
     Column(
       None,
       Some("public"),
@@ -89,7 +103,8 @@ object Fixtures {
       YesNo.Yes,
       None,
       YesNo.Yes,
-      YesNo.No),
+      YesNo.No
+    ),
     Column(
       None,
       Some("public"),
@@ -128,7 +143,8 @@ object Fixtures {
       YesNo.No,
       None,
       YesNo.Yes,
-      YesNo.No),
+      YesNo.No
+    ),
     Column(
       None,
       Some("public"),
@@ -147,7 +163,8 @@ object Fixtures {
       YesNo.No,
       None,
       YesNo.Yes,
-      YesNo.No)
+      YesNo.No
+    )
   )
 
   val table1Pk = PrimaryKey(None, Some("public"), "table1", "id", 1, Some("table1_id_pk"))
@@ -155,7 +172,21 @@ object Fixtures {
   val pks = List(table1Pk, table2Pk)
 
 //  val crossRef = CrossReference(None, Some("public"), "table2", )
-  val indexInfo = IndexInfo(None, Some("public"), "table1", false, None, "id_idx", IndexType.tableIndexOther, 1, Some("id"), Some(AscDesc.asc), 1, 1, None)
+  val indexInfo = IndexInfo(
+    None,
+    Some("public"),
+    "table1",
+    false,
+    None,
+    "id_idx",
+    IndexType.tableIndexOther,
+    1,
+    Some("id"),
+    Some(AscDesc.asc),
+    1,
+    1,
+    None
+  )
 
   val databaseCache = DatabaseMetadataCache.apply(
     DatabaseQuery.everything,
@@ -164,7 +195,8 @@ object Fixtures {
     columns,
     List.empty,
     pks,
-    List(indexInfo))
+    List(indexInfo)
+  )
 
   val table1Pks = List(IdealColumn("id", IntegerType.autoIncrement, false, None))
   val table1Columns = List(

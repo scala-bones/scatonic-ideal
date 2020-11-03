@@ -13,7 +13,7 @@ object Diff {
     */
   trait ColumnDiff
 
-  /** When the 'ideal' data type is different than the column in the DB cache which shares the same column name.*/
+  /** When the 'ideal' data type is different than the column in the DB cache which shares the same column name. */
   case class ColumnDataTypeDiff(existingDataType: DataType.Value, newDataType: IdealDataType)
       extends ColumnDiff
 
@@ -26,14 +26,14 @@ object Diff {
       extends ColumnDiff
 
   /**
-   * When the 'ideal' unique constraint is different then the DB cache
-   */
+    * When the 'ideal' unique constraint is different then the DB cache
+    */
   case class UniqueDiff(columnGroup: List[IdealColumn])
 
   /** When there are missing or extranious Primary Keys between the 'ideal' and the DB Cache
     * @param missing The list of missing PrimaryKeys.
     * @param extraneousKeys The list of primary keys in the DB Cache which are not listed in the 'ideal'.
-   **/
+    */
   case class PrimaryKeyDiff(missing: List[IdealColumn], extraneousKeys: List[PrimaryKey])
 
   /**
@@ -52,7 +52,8 @@ object Diff {
     primaryKeysMissing: List[(IdealTable, IdealColumn)],
     primaryKeysExtraneous: List[(IdealTable, PrimaryKey)],
     missingForeignKeys: List[IdealForeignKey],
-    uniqueDiffs: List[(IdealTable, UniqueDiff)])
+    uniqueDiffs: List[(IdealTable, UniqueDiff)]
+  )
 
   /**
     * Give a database Cache and a Schema Prototype, find the list of changes needed to be made
@@ -73,19 +74,21 @@ object Diff {
       missingVsExistingTables(databaseCache, protoSchema.name, protoSchema.tables)
     val missingExistingColumns =
       existingTables.foldLeft(
-        (List.empty[(IdealTable, IdealColumn)], List.empty[(IdealTable, IdealColumn, Column)])) {
-        (result, table) =>
-          {
-            val missingExisting = missingVsExistingColumns(databaseCache, table._1, table._2)
-            val withTable = missingExisting._1.map(c => (table._1, c))
-            result
-              .copy(_1 = result._1 ::: withTable)
-              .copy(_2 = result._2 ::: missingExisting._2.map(me => (table._1, me._1, me._2)))
-          }
+        (List.empty[(IdealTable, IdealColumn)], List.empty[(IdealTable, IdealColumn, Column)])
+      ) { (result, table) =>
+        {
+          val missingExisting = missingVsExistingColumns(databaseCache, table._1, table._2)
+          val withTable = missingExisting._1.map(c => (table._1, c))
+          result
+            .copy(_1 = result._1 ::: withTable)
+            .copy(_2 = result._2 ::: missingExisting._2.map(me => (table._1, me._1, me._2)))
+        }
       }
 
     val columnDiff = missingExistingColumns._2.flatMap(c => {
-      val indexInfos = databaseCache.indexInfos.filter(i => i.columnName.contains(c._2.name) && i.tableName == c._1.name)
+      val indexInfos = databaseCache.indexInfos.filter(i =>
+        i.columnName.contains(c._2.name) && i.tableName == c._1.name
+      )
       val diff = compareColumn(c._2, c._3, indexInfos)
       if (diff.isEmpty) None
       else Some((c._1, c._2, diff))
@@ -97,7 +100,7 @@ object Diff {
     })
 
     val uniqueConstraintDiff = existingTables.flatMap(table => {
-      findUniqueConstraintDifferences(databaseCache, protoSchema.name, table._1).map( (table._1, _))
+      findUniqueConstraintDifferences(databaseCache, protoSchema.name, table._1).map((table._1, _))
     })
 
     DiffResult(
@@ -107,7 +110,8 @@ object Diff {
       primaryKeyDifference.flatMap(_._1),
       primaryKeyDifference.flatMap(_._2),
       List.empty[IdealForeignKey],
-      uniqueConstraintDiff)
+      uniqueConstraintDiff
+    )
 
   }
 
@@ -123,7 +127,8 @@ object Diff {
   def missingVsExistingTables(
     databaseCache: DatabaseMetadataCache,
     schemaName: String,
-    tables: List[IdealTable]): (List[IdealTable], List[(IdealTable, Table)]) = {
+    tables: List[IdealTable]
+  ): (List[IdealTable], List[(IdealTable, Table)]) = {
     tables.foldRight((List.empty[IdealTable], List.empty[(IdealTable, Table)])) {
       (subTable, result) =>
         {
@@ -145,7 +150,8 @@ object Diff {
   def missingVsExistingColumns(
     databaseCache: DatabaseMetadataCache,
     table: IdealTable,
-    diffTable: Table): (List[IdealColumn], List[(IdealColumn, Column)]) = {
+    diffTable: Table
+  ): (List[IdealColumn], List[(IdealColumn, Column)]) = {
     table.allColumns.foldLeft((List.empty[IdealColumn], List.empty[(IdealColumn, Column)])) {
       (result, protoColumn) =>
         {
@@ -162,8 +168,14 @@ object Diff {
       PrimaryKeyDiff(List.empty, extraneous)
   }
 
-  def findUniqueConstraintDifferences(databaseCache: DatabaseMetadataCache, schemaName: String, table: IdealTable): List[UniqueDiff] = {
-    val tableIndexes = databaseCache.indexInfos.filter(ii => ii.tableName == table.name && ii.tableSchema.contains(schemaName))
+  def findUniqueConstraintDifferences(
+    databaseCache: DatabaseMetadataCache,
+    schemaName: String,
+    table: IdealTable
+  ): List[UniqueDiff] = {
+    val tableIndexes = databaseCache.indexInfos.filter(ii =>
+      ii.tableName == table.name && ii.tableSchema.contains(schemaName)
+    )
     val grouped = tableIndexes.groupBy(_.indexName)
     val missingConstraint = table.uniqueConstraints.filterNot(uc => {
       val columnNames = uc.uniqueGroup.map(_.name).toSet
@@ -177,9 +189,11 @@ object Diff {
     databaseCache: DatabaseMetadataCache,
     schemaName: String,
     table: IdealTable,
-    diffTable: Table): PrimaryKeyDiff = {
+    diffTable: Table
+  ): PrimaryKeyDiff = {
     val tablePks = databaseCache.primaryKeys.filter(pk =>
-      pk.schemaName.contains(schemaName) && pk.tableName == table.name)
+      pk.schemaName.contains(schemaName) && pk.tableName == table.name
+    )
     //The list of Differences and remaining PrimaryKeys in the cache which
     // are not currently matched up with a ProtoColumn
     table.primaryKeyColumns.foldLeft(PrimaryKeyDiff.withExtraneous(tablePks)) {
@@ -207,7 +221,11 @@ object Diff {
     * @param diffColumn The cached column for comparison
     * @return List of differences
     */
-  def compareColumn(column: IdealColumn, diffColumn: Column, indexInfos: List[IndexInfo]): List[ColumnDiff] = {
+  def compareColumn(
+    column: IdealColumn,
+    diffColumn: Column,
+    indexInfos: List[IndexInfo]
+  ): List[ColumnDiff] = {
     val dt =
       if (!isEquivalent(column.dataType, diffColumn.dataType, diffColumn))
         List(ColumnDataTypeDiff(diffColumn.dataType, column.dataType))
@@ -217,9 +235,11 @@ object Diff {
         List(ColumnRemarkDiff(diffColumn.remarks, column.remark))
       else List.empty
     val nl = {
-      if (diffColumn.isNullable == YesNo.Unknown ||
-          (column.nullable && diffColumn.isNullable == YesNo.No) ||
-          (!column.nullable && diffColumn.isNullable == YesNo.Yes))
+      if (
+        diffColumn.isNullable == YesNo.Unknown ||
+        (column.nullable && diffColumn.isNullable == YesNo.No) ||
+        (!column.nullable && diffColumn.isNullable == YesNo.Yes)
+      )
         List(ColumnNullableDiff(diffColumn.isNullable, YesNo.fromBoolean(column.nullable)))
       else List.empty
     }
@@ -228,37 +248,38 @@ object Diff {
   }
 
   /**
-   * Check the ideal type of the array compared to the metadata.  Most of the
-   * time we can ensure the sizes match (such as varchar(50) == string bounded to 50 characters)
-   * but in a few cases we can not compare the upper bound.  In this case we say the
-   * two are equivalent if the metadata size is greater than the ideal size.
-   * TODO: This is most certainly PostgreSQL specific.
-   * @param dataType The ideal type of the data in the array
-   * @param column The jdbc metadata column
-   * @return If the column is equivalent to the data type.
-   */
+    * Check the ideal type of the array compared to the metadata.  Most of the
+    * time we can ensure the sizes match (such as varchar(50) == string bounded to 50 characters)
+    * but in a few cases we can not compare the upper bound.  In this case we say the
+    * two are equivalent if the metadata size is greater than the ideal size.
+    * TODO: This is most certainly PostgreSQL specific.
+    * @param dataType The ideal type of the data in the array
+    * @param column The jdbc metadata column
+    * @return If the column is equivalent to the data type.
+    */
   protected def checkArray(dataType: IdealDataType, column: Column): Boolean = {
     (dataType, column.typeName) match {
       case (BinaryType(Some(size)), "_bit") if size == 1 => column.columnSize == 1
-      case (SmallIntType, "_int2") => true
-      case (StringType(size, _), "_text") => size.forall(column.columnSize >= _)
-      case (StringType(size, _), "_varchar") => size.contains(size)
-      case (IntegerType(_), "_int4") => true
-      case (LongType(_), "_int8") => true
-      case (RealType, "_float4") => true
-      case (DoubleType, "_float8") => true
-      case (NumericType(precision,scale), "_numeric") =>
+      case (SmallIntType, "_int2")                       => true
+      case (StringType(size, _), "_text")                => size.forall(column.columnSize >= _)
+      case (StringType(size, _), "_varchar")             => size.contains(size)
+      case (IntegerType(_), "_int4")                     => true
+      case (LongType(_), "_int8")                        => true
+      case (RealType, "_float4")                         => true
+      case (DoubleType, "_float8")                       => true
+      case (NumericType(precision, scale), "_numeric") =>
         precision == column.columnSize && column.decimalDigits.contains(scale)
-      case (DateType, "_date") => true
+      case (DateType, "_date")                      => true
       case (TimestampType(tz), "_timestamp") if !tz => true
       case (TimestampType(tz), "_timestampz") if tz => true
-      case (TimeType(tz), "_time") if !tz => true
-      case (TimeType(tz), "_timez") if tz => true
-      case (FixedLengthBinaryType(size), "_varbit") => column.columnSize > size // Postgres metadata columnSize doesn't reflect the bounded size
-      case (BinaryType(size), "_bytea") => size.forall(column.columnSize > _)
-      case (BooleanType, "_bool") => true
-      case (FixedLengthCharacterType(size, _), "_bpchar") =>column.columnSize == size
-      case _ => false
+      case (TimeType(tz), "_time") if !tz           => true
+      case (TimeType(tz), "_timez") if tz           => true
+      case (FixedLengthBinaryType(size), "_varbit") =>
+        column.columnSize > size // Postgres metadata columnSize doesn't reflect the bounded size
+      case (BinaryType(size), "_bytea")                   => size.forall(column.columnSize > _)
+      case (BooleanType, "_bool")                         => true
+      case (FixedLengthCharacterType(size, _), "_bpchar") => column.columnSize == size
+      case _                                              => false
     }
   }
 
@@ -272,9 +293,10 @@ object Diff {
   def isEquivalent(
     idealDataType: IdealDataType,
     dataType: DataType.Value,
-    column: Column): Boolean = {
+    column: Column
+  ): Boolean = {
     (idealDataType, dataType) match {
-      case (ArrayType(arrayOf), DataType.Array) => checkArray(arrayOf, column)
+      case (ArrayType(arrayOf), DataType.Array)                 => checkArray(arrayOf, column)
       case (BinaryType(size), DataType.Bit) if size.contains(1) => true
       case (SmallIntType, DataType.TinyInt)                     => true
       case (SmallIntType, DataType.SmallInt)                    => true

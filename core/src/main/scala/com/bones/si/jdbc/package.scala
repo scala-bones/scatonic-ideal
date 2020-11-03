@@ -3,8 +3,8 @@ package com.bones.si
 import java.sql.{DatabaseMetaData, Types}
 
 /**
- * Case class wrappers for the types returned by the JDBC Database Metadata object.
- */
+  * Case class wrappers for the types returned by the JDBC Database Metadata object.
+  */
 package object jdbc {
 
   case class DbAttribute(
@@ -26,7 +26,8 @@ package object jdbc {
     scopeCatalog: Option[String],
     scopeSchema: Option[String],
     scopeTable: Option[String],
-    sourceDataType: Option[String])
+    sourceDataType: Option[String]
+  )
   object Catalog {
     val catalogColumnName = "TABLE_CAT"
   }
@@ -77,7 +78,8 @@ package object jdbc {
     deleteRule: UpdateDeleteRule.Value,
     foreignKeyName: Option[String],
     primaryKeyName: Option[String],
-    deferrability: Deferrability.Value)
+    deferrability: Deferrability.Value
+  )
   object DataType extends Enumeration {
     protected case class Val(name: String, intId: Int) extends super.Val
     def findByConstant(typeId: Int) = values.find(_.intId == typeId)
@@ -142,10 +144,11 @@ package object jdbc {
       else if (str.isEmpty) Some(Unknown)
       else None
     }
-    def findByOptionalString(opt: Option[String]): Option[Value] = opt match {
-      case Some(str) => findByString(str)
-      case None      => Some(Unknown)
-    }
+    def findByOptionalString(opt: Option[String]): Option[Value] =
+      opt match {
+        case Some(str) => findByString(str)
+        case None      => Some(Unknown)
+      }
     type YesNo = Value
     val Yes, No, Unknown = Value
   }
@@ -192,7 +195,8 @@ package object jdbc {
     isNullable: YesNo.YesNo,
     sourceDataType: Option[Short],
     isAutoIncrement: YesNo.YesNo,
-    isGeneratedColumn: YesNo.YesNo)
+    isGeneratedColumn: YesNo.YesNo
+  )
 
   object FunctionType extends Enumeration {
     case class Val protected (typeId: Int) extends super.Val
@@ -210,7 +214,8 @@ package object jdbc {
     functionName: String,
     remarks: Option[String],
     functionType: FunctionType.Value,
-    specificName: String)
+    specificName: String
+  )
 
   case class ImportedKeys(
     primaryKeyTableCatalogName: Option[String],
@@ -226,7 +231,8 @@ package object jdbc {
     deleteRule: UpdateDeleteRule.Value,
     foreignKeyName: Option[String],
     primaryKeyName: Option[String],
-    deferrability: Deferrability.Value)
+    deferrability: Deferrability.Value
+  )
 
   object IndexType extends Enumeration {
     type IndexType = Value
@@ -265,7 +271,7 @@ package object jdbc {
     cardinality: Int,
     pages: Int,
     filterPosition: Option[String]
-                      )
+  )
 
   object TableType extends Enumeration {
     type TableType = Value
@@ -303,7 +309,8 @@ package object jdbc {
     typesSchema: Option[String],
     typeName: Option[String],
     selfReferencingColumnName: Option[String],
-    referenceGeneration: Option[ReferenceGeneration.Value])
+    referenceGeneration: Option[ReferenceGeneration.Value]
+  )
   case class TablePrivilege(
     catalogName: Option[String],
     schemaName: Option[String],
@@ -311,7 +318,8 @@ package object jdbc {
     grantor: Option[String],
     grantee: String,
     privilege: String,
-    isGrantable: YesNo.Value)
+    isGrantable: YesNo.Value
+  )
 
   object Searchable extends Enumeration {
     case class Val(searchableId: Int, name: String, description: String) extends super.Val
@@ -351,7 +359,8 @@ package object jdbc {
     tableName: String,
     columnName: String,
     keySequence: Short,
-    name: Option[String])
+    name: Option[String]
+  )
 
   object ProcedureType extends Enumeration {
     case class Val(procedureTypeId: Int, name: String, description: String) extends super.Val
@@ -359,9 +368,18 @@ package object jdbc {
     def findByProcedureTypeId(procedureTypeId: Int): Option[Value] =
       values.find(_.procedureTypeId == procedureTypeId)
 
-    val ProcedureResultUnknown = Val(DatabaseMetaData.procedureResultUnknown, "procedureResultUnknown", "Cannot determine if  a return value will be returned")
-    val ProcedureNoResult = Val(DatabaseMetaData.procedureNoResult, "procedureNoResult", "Does not return a return value")
-    val ProcedureReturnsResult = Val(DatabaseMetaData.procedureReturnsResult, "procedureReturnsResult", "Returns a return value")
+    val ProcedureResultUnknown = Val(
+      DatabaseMetaData.procedureResultUnknown,
+      "procedureResultUnknown",
+      "Cannot determine if  a return value will be returned"
+    )
+    val ProcedureNoResult =
+      Val(DatabaseMetaData.procedureNoResult, "procedureNoResult", "Does not return a return value")
+    val ProcedureReturnsResult = Val(
+      DatabaseMetaData.procedureReturnsResult,
+      "procedureReturnsResult",
+      "Returns a return value"
+    )
 
   }
   case class Procedure(
@@ -370,7 +388,8 @@ package object jdbc {
     name: String,
     remarks: Option[String],
     procedureType: ProcedureType.Value,
-    specificName: String)
+    specificName: String
+  )
 
   case class Schema(name: String, tables: List[Table])
 }

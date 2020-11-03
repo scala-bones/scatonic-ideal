@@ -24,7 +24,7 @@ abstract class IntegrationFixture extends FixtureAnyFunSuite {
     val dbUrl = Option(System.getProperty("pg-url"))
       .getOrElse("jdbc:postgresql://localhost/postgres?user=travis&password=my-secret-pw")
 
-    val ds = new PGSimpleDataSource() ;
+    val ds = new PGSimpleDataSource();
     ds.setURL(dbUrl)
     val con = ds.getConnection
     dropTables(con)
@@ -37,7 +37,7 @@ abstract class IntegrationFixture extends FixtureAnyFunSuite {
     val defaultDb = "postgresql"
 
     val con = Option(System.getProperty("test-db")).getOrElse(defaultDb) match {
-      case "mysql" => mysqlDataSource
+      case "mysql"      => mysqlDataSource
       case "postgresql" => postgresDataSource
     }
 
@@ -180,7 +180,6 @@ abstract class IntegrationFixture extends FixtureAnyFunSuite {
 
     // TODO: Get Travis-CI set up with at least version 11 of Postgres to support procedures
 //    createProcedure(con)
-
 
   }
 

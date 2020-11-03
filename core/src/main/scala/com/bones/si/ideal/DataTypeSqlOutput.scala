@@ -1,8 +1,8 @@
 package com.bones.si.ideal
 
 /**
- * Implementation of an output which is an SQL String.
- */
+  * Implementation of an output which is an SQL String.
+  */
 abstract class DataTypeSqlOutput extends DataTypeOutput[String] {
 
   def toCase(string: String): String
@@ -22,7 +22,7 @@ abstract class DataTypeSqlOutput extends DataTypeOutput[String] {
   override def binary(binaryType: BinaryType): String =
     binaryType.size match {
       case Some(s) => s"$VARBINARY($s)"
-      case None => s"$VARBINARY"
+      case None    => s"$VARBINARY"
     }
 
   override def fixedLengthBinary(binaryType: FixedLengthBinaryType): String = {
@@ -57,10 +57,8 @@ abstract class DataTypeSqlOutput extends DataTypeOutput[String] {
     if (timeType.withTimeZone) toCase("time with time zone")
     else toCase("time without time zone")
 
-
   override def timestamp(timestampType: TimestampType): String =
     if (timestampType.withTimeZone) toCase("timestamp with time zone")
     else toCase("timestamp without time zone")
-
 
 }

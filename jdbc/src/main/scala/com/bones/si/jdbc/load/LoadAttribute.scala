@@ -6,10 +6,17 @@ import com.bones.si.jdbc.{DataType, DbAttribute, Nullable, YesNo}
 
 object LoadAttribute extends DefaultLoader[DbAttribute] {
 
-  override protected def loadFromQuery(databaseQuery: DatabaseQuery, con: Connection): LazyList[ResultSet] = {
+  override protected def loadFromQuery(
+    databaseQuery: DatabaseQuery,
+    con: Connection
+  ): LazyList[ResultSet] = {
     val queryParams = Retrieve.databaseQueryToAttributeQuery(databaseQuery)
-    queryParams.to(LazyList).map(queryParam =>
-      con.getMetaData.getAttributes(queryParam._1.orNull, queryParam._2.orNull, null, queryParam._3.orNull))
+    queryParams
+      .to(LazyList)
+      .map(queryParam =>
+        con.getMetaData
+          .getAttributes(queryParam._1.orNull, queryParam._2.orNull, null, queryParam._3.orNull)
+      )
   }
 
   override protected def extractRow(rs: ResultSet): DbAttribute = {
@@ -20,13 +27,13 @@ object LoadAttribute extends DefaultLoader[DbAttribute] {
     val nullableInt = req(rs.getInt("NULLABLE"))
     val nullable = Nullable
       .findById(nullableInt)
-      .getOrElse(
-        throw new MissingDataException(s"could  not find nullable with id ${nullableInt}"))
+      .getOrElse(throw new MissingDataException(s"could  not find nullable with id ${nullableInt}"))
     val isNullableStr = req(rs.getString("IS_NULLABLE"))
     val isNullable = YesNo
       .findByString(isNullableStr)
       .getOrElse(
-        throw new MissingDataException(s"could not fin isNullable with str: $isNullableStr"))
+        throw new MissingDataException(s"could not fin isNullable with str: $isNullableStr")
+      )
     DbAttribute(
       Option(rs.getString("TYPE_CAT")),
       Option(rs.getString("TYPE_SCHEM")),

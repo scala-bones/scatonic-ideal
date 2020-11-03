@@ -1,9 +1,9 @@
 package com.bones.si.ideal
 
 /**
- * Produces output for types specific to Postgres, such as bytea, serial and text.
- * @param toCaseFunction Used as a post processor for SQL Keywords to produce a specifit output style, usually upper or lower case.
- */
+  * Produces output for types specific to Postgres, such as bytea, serial and text.
+  * @param toCaseFunction Used as a post processor for SQL Keywords to produce a specifit output style, usually upper or lower case.
+  */
 case class DataTypePostgresSqlOutput(toCaseFunction: String => String) extends DataTypeSqlOutput {
 
   override def toCase(string: String): String = toCaseFunction(string)
@@ -24,7 +24,6 @@ case class DataTypePostgresSqlOutput(toCaseFunction: String => String) extends D
   override def binary(binaryType: BinaryType): String =
     if (binaryType.size.contains(1)) BIT else BYTEA
 
-
   override def fixedLengthBinary(binaryType: FixedLengthBinaryType): String =
     if (binaryType.size == 1) BIT else BYTEA
 
@@ -37,7 +36,7 @@ case class DataTypePostgresSqlOutput(toCaseFunction: String => String) extends D
   override def string(stringType: StringType): String =
     stringType.length.filter(_ < 255) match {
       case Some(l) => s"$VARCHAR($l)"
-      case None => TEXT
+      case None    => TEXT
     }
 
 }

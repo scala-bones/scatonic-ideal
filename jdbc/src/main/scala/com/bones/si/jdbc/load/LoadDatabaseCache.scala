@@ -5,7 +5,11 @@ import java.sql.Connection
 import com.bones.si.jdbc
 
 object LoadDatabaseCache {
-  def load(query: DatabaseQuery, tableTypes: List[String], con: Connection): DatabaseMetadataCache = {
+  def load(
+    query: DatabaseQuery,
+    tableTypes: List[String],
+    con: Connection
+  ): DatabaseMetadataCache = {
     val tables = LoadTable.loadCustomTypes(query, con, tableTypes)
     val columns = LoadColumn.load(query, con)
     val primaryKeys = LoadPrimaryKey.load(query, con)
@@ -15,6 +19,14 @@ object LoadDatabaseCache {
     val indexInfoQuery = query.copy(tableNames = tables.map(_.name))
     val indexInfo = LoadIndexInfo.load(indexInfoQuery, con)
 
-    DatabaseMetadataCache(query, tableTypes, tables, columns, crossReferences, primaryKeys, indexInfo)
+    DatabaseMetadataCache(
+      query,
+      tableTypes,
+      tables,
+      columns,
+      crossReferences,
+      primaryKeys,
+      indexInfo
+    )
   }
 }

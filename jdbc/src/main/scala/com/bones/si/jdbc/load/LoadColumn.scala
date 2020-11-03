@@ -6,15 +6,18 @@ import com.bones.si.jdbc.{Column, DataType, Nullable, YesNo}
 
 object LoadColumn extends DefaultLoader[Column] {
 
-
-  override protected def loadFromQuery(databaseQuery: DatabaseQuery, con: Connection): LazyList[ResultSet] = {
+  override protected def loadFromQuery(
+    databaseQuery: DatabaseQuery,
+    con: Connection
+  ): LazyList[ResultSet] = {
     val queryParams = Retrieve.databaseQueryToHierarchyQuery(databaseQuery)
-    queryParams.to(LazyList).map(queryParam =>
-      con.getMetaData
-        .getColumns(queryParam._1.orNull, queryParam._2.orNull, queryParam._3.orNull, null)
-    )
+    queryParams
+      .to(LazyList)
+      .map(queryParam =>
+        con.getMetaData
+          .getColumns(queryParam._1.orNull, queryParam._2.orNull, queryParam._3.orNull, null)
+      )
   }
-
 
   override protected def extractRow(rs: ResultSet): Column = {
     val dataTypeId = rs.getInt(Column.dataTypeCol)
@@ -29,10 +32,13 @@ object LoadColumn extends DefaultLoader[Column] {
     val isAutoIncrement = YesNo
       .findByString(isAutoIncrementStr)
       .getOrElse(
-        throw new MissingDataException(s"Unknown isAutoIncrement str: ${isAutoIncrementStr}"))
+        throw new MissingDataException(s"Unknown isAutoIncrement str: ${isAutoIncrementStr}")
+      )
     val isGeneratedColumnStr = rs.getString(Column.isGeneratedColumnCol)
-    val isGeneratedColumn = YesNo.findByString(isGeneratedColumnStr) getOrElse (throw new MissingDataException(
-      s"Unknown isGeneratedColumnStr str: ${isGeneratedColumnStr}"))
+    val isGeneratedColumn =
+      YesNo.findByString(isGeneratedColumnStr) getOrElse (throw new MissingDataException(
+        s"Unknown isGeneratedColumnStr str: ${isGeneratedColumnStr}"
+      ))
     val nullableStr = rs.getInt(Column.nullableCol)
     val nullable = Nullable
       .findById(nullableStr)

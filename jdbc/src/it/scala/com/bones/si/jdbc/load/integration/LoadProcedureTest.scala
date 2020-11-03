@@ -7,8 +7,7 @@ import org.scalatest.matchers.must.Matchers
 class LoadProcedureTest extends IntegrationFixture with Matchers {
 
   //TODO: Update travis ci postgers to version 11 to support procesures.
-  ignore("load procedures") { f=>
-
+  ignore("load procedures") { f =>
     val query = DatabaseQuery.everything
 
     val procedures = LoadProcedure.load(query, f.con)

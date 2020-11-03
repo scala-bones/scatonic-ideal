@@ -6,8 +6,10 @@ import com.bones.si.jdbc.{CrossReference, Deferrability, UpdateDeleteRule}
 
 object LoadCrossReference extends DefaultLoader[CrossReference] {
 
-
-  override protected def loadFromQuery(databaseQuery: DatabaseQuery, con: Connection): LazyList[ResultSet] = {
+  override protected def loadFromQuery(
+    databaseQuery: DatabaseQuery,
+    con: Connection
+  ): LazyList[ResultSet] = {
     val queryParams = Retrieve.databaseQueryToHierarchyQuery(databaseQuery).to(LazyList)
     queryParams.map(param =>
       con.getMetaData.getCrossReference(
@@ -16,27 +18,30 @@ object LoadCrossReference extends DefaultLoader[CrossReference] {
         param._3.orNull,
         param._1.orNull,
         param._2.orNull,
-        param._3.orNull)
+        param._3.orNull
+      )
     )
   }
-
 
   protected override def extractRow(rs: ResultSet): CrossReference = {
     val updateRuleId = rs.getInt("UPDATE_RULE")
     val updateRule = UpdateDeleteRule
       .findById(updateRuleId)
       .getOrElse(
-        throw new MissingDataException(s"could not find UpdateDeleteRule by id: ${updateRuleId}"))
+        throw new MissingDataException(s"could not find UpdateDeleteRule by id: ${updateRuleId}")
+      )
     val deleteRuleId = rs.getInt("DELETE_RULE")
     val deleteRule = UpdateDeleteRule
       .findById(updateRuleId)
       .getOrElse(
-        throw new MissingDataException(s"could not find UpdateDeleteRule by id: ${deleteRuleId}"))
+        throw new MissingDataException(s"could not find UpdateDeleteRule by id: ${deleteRuleId}")
+      )
     val deferrabilityId = rs.getInt("DEFERRABILITY")
     val deferrability = Deferrability
       .findById(deferrabilityId)
       .getOrElse(
-        throw new MissingDataException(s"could not find Deferrability by id: ${deferrabilityId}"))
+        throw new MissingDataException(s"could not find Deferrability by id: ${deferrabilityId}")
+      )
 
     CrossReference(
       Option(rs.getString("PKTABLE_CAT")),

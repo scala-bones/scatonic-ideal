@@ -6,7 +6,7 @@ import org.scalatest.matchers.must.Matchers
 
 class LoadIndexInfoTest extends IntegrationFixture with Matchers {
 
-  test("load index info") { f=>
+  test("load index info") { f =>
     val query = DatabaseQuery.everything.tables("wrapper_table_a")
     val indexInfos = LoadIndexInfo.load(query, f.con)
 

@@ -4,7 +4,6 @@ import com.bones.si.ideal.Fixtures._
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.must.Matchers
 
-
 class SchemaOutputTest extends AnyFunSuite with Matchers {
 
   test("sql output for columns lowercase") {
@@ -79,7 +78,8 @@ class SchemaOutputTest extends AnyFunSuite with Matchers {
          |date_col date, double_col double precision, inverval_col interval, long_col bigint,
          |long_auto bigserial not null, numeric_col numeric(10,2), real_col real, small_int_col smallint,
          |time_col_with time with time zone, time_col_without time without time zone,
-         |timestamp_col_with timestamp with time zone, timestamp_col_without timestamp without time zone)""".stripMargin.replaceAll("\n", " ")
+         |timestamp_col_with timestamp with time zone, timestamp_col_without timestamp without time zone)""".stripMargin
+        .replaceAll("\n", " ")
 
   }
 
@@ -98,23 +98,27 @@ class SchemaOutputTest extends AnyFunSuite with Matchers {
         |date_col DATE, double_col DOUBLE PRECISION, inverval_col INTERVAL, long_col BIGINT,
         |long_auto BIGSERIAL NOT NULL, numeric_col NUMERIC(10,2), real_col REAL, small_int_col SMALLINT,
         |time_col_with TIME WITH TIME ZONE, time_col_without TIME WITHOUT TIME ZONE,
-        |timestamp_col_with TIMESTAMP WITH TIME ZONE, timestamp_col_without TIMESTAMP WITHOUT TIME ZONE)""".stripMargin.replaceAll("\n", " ")
+        |timestamp_col_with TIMESTAMP WITH TIME ZONE, timestamp_col_without TIMESTAMP WITHOUT TIME ZONE)""".stripMargin
+        .replaceAll("\n", " ")
 
   }
 
   test("multiple primary keys lowercase") {
     val schemaOutput = PostgresSqlOutput.lowercase
-    val table = table1.copy(primaryKeyColumns = table1.primaryKeyColumns :+ IdealColumn("other_id", LongType(), false, None))
+    val table = table1.copy(primaryKeyColumns =
+      table1.primaryKeyColumns :+ IdealColumn("other_id", LongType(), false, None)
+    )
     val output = schemaOutput.createTableOutput("public", table)
     output.head mustEqual "create table public.table1 (id serial not null, other_id bigint not null, name text not null, age integer, primary key (id, other_id))"
   }
 
   test("multiple primary keys uppercase") {
     val schemaOutput = PostgresSqlOutput.uppercase
-    val table = table1.copy(primaryKeyColumns = table1.primaryKeyColumns :+ IdealColumn("other_id", LongType(), false, None))
+    val table = table1.copy(primaryKeyColumns =
+      table1.primaryKeyColumns :+ IdealColumn("other_id", LongType(), false, None)
+    )
     val output = schemaOutput.createTableOutput("public", table)
     output.head mustEqual "CREATE TABLE public.table1 (id SERIAL NOT NULL, other_id BIGINT NOT NULL, name TEXT NOT NULL, age INTEGER, PRIMARY KEY (id, other_id))"
   }
-
 
 }

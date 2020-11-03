@@ -26,6 +26,7 @@ class LoadTypeInfoTest extends IntegrationFixture with Matchers {
       None,
       0,
       0,
-      10)
+      10
+    )
   }
 }

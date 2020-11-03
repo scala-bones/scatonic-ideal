@@ -21,7 +21,8 @@ class ExampleTest extends AnyFunSuite with Matchers {
         "create_date",
         TimestampType.withoutTimeZone,
         false,
-        Some("when the customer was created"))
+        Some("when the customer was created")
+      )
     )
 
     val table1 = IdealTable("customer", table1Pk, table1Columns)
@@ -35,7 +36,8 @@ class ExampleTest extends AnyFunSuite with Matchers {
         "create_date",
         TimestampType.withoutTimeZone(),
         false,
-        Some("The data of the order"))
+        Some("The data of the order")
+      )
     )
     val table2Fks = List(
       IdealForeignKey(
@@ -43,7 +45,8 @@ class ExampleTest extends AnyFunSuite with Matchers {
           "customer_id",
           IntegerType(),
           false,
-          Some("The id of the customer associated to the order")),
+          Some("The id of the customer associated to the order")
+        ),
         (table1, table1Pk)
       )
     )
@@ -87,8 +90,11 @@ class ExampleTest extends AnyFunSuite with Matchers {
         "satisfied_rating",
         IntegerType(),
         true,
-        Some("scale of 1 - 5, how satisfied was the customer with the order"))
-      val newTable2 = table2.copy(columns = newColumn :: table2.columns).copy(uniqueConstraints = List(UniqueConstraint(table2.columns)))
+        Some("scale of 1 - 5, how satisfied was the customer with the order")
+      )
+      val newTable2 = table2
+        .copy(columns = newColumn :: table2.columns)
+        .copy(uniqueConstraints = List(UniqueConstraint(table2.columns)))
 
       val table3Pk =
         IdealColumn("id", IntegerType.autoIncrement, false, Some("the id of the correspondence"))
@@ -97,7 +103,8 @@ class ExampleTest extends AnyFunSuite with Matchers {
         IdealColumn("body", StringType.unbounded, false, Some("the body of the correspondence"))
       )
       val table3Unique = UniqueConstraint(table3columns)
-      val table3 = IdealTable("correspondence", table3Pk, table3columns, List.empty, List(table3Unique), None)
+      val table3 =
+        IdealTable("correspondence", table3Pk, table3columns, List.empty, List(table3Unique), None)
 
       // This is our new ideal schema
       val newSchema = IdealSchema("public", List(table1, newTable2, table3))
@@ -129,7 +136,8 @@ class ExampleTest extends AnyFunSuite with Matchers {
       val cleanupSql = List(
         "drop table if exists public.order",
         "drop table if exists public.customer",
-        "drop table if exists public.correspondence")
+        "drop table if exists public.correspondence"
+      )
       cleanupSql.foreach(str => {
         val statement = con.createStatement()
         statement.execute(str)

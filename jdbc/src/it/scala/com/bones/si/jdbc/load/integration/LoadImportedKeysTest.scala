@@ -4,9 +4,9 @@ import com.bones.si.jdbc.load.{DatabaseQuery, LoadImportedKeys}
 import com.bones.si.jdbc.{Deferrability, UpdateDeleteRule}
 import org.scalatest.matchers.must.Matchers
 
-class LoadImportedKeysTest  extends IntegrationFixture with Matchers {
+class LoadImportedKeysTest extends IntegrationFixture with Matchers {
 
-  test("load imported keys") { f=>
+  test("load imported keys") { f =>
     val query = DatabaseQuery.everything
     val importedKeysMd = LoadImportedKeys.load(query, f.con)
 
