@@ -59,8 +59,8 @@ class DiffTest extends AnyFunSuite with Matchers {
       newNotNullable
     )
 
-    val newTable1 = IdealTable("table1", table1Pks, tableColumnsChanged, List.empty, None)
-    val newTable2 = IdealTable("table2", table2Pks, table2Columns, List.empty, None)
+    val newTable1 = IdealTable("table1", table1Pks, tableColumnsChanged, List.empty, List.empty, None)
+    val newTable2 = IdealTable("table2", table2Pks, table2Columns, List.empty, List.empty, None)
 
     val newSchema = IdealSchema("public", List(newTable1, newTable2))
 
@@ -80,7 +80,7 @@ class DiffTest extends AnyFunSuite with Matchers {
 
   test("report missing primary keys") {
     val anotherPk = IdealColumn("other_id", IntegerType(), false, None)
-    val table = IdealTable("table1", anotherPk :: table1Pks, table1Columns, List.empty, None)
+    val table = IdealTable("table1", anotherPk :: table1Pks, table1Columns, List.empty, List.empty, None)
 
     val schema = IdealSchema("public", List(table, table2))
 
@@ -101,7 +101,7 @@ class DiffTest extends AnyFunSuite with Matchers {
   test("report missing extraneous primary keys") {
 
     // move primary key to be a regular column, it should be reported as a missing PK.
-    val table = IdealTable("table1", List.empty, table1Pks ::: table1Columns, List.empty, None)
+    val table = IdealTable("table1", List.empty, table1Pks ::: table1Columns, List.empty, List.empty, None)
     val schema = IdealSchema("public", List(table, table2))
 
     val result = Diff.findDiff(databaseCache, schema)

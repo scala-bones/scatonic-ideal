@@ -1,9 +1,9 @@
 package com.bones.si.jdbc.load
 
-import com.bones.si.jdbc.{Column, CrossReference, PrimaryKey, Table}
+import com.bones.si.jdbc.{Column, CrossReference, IndexInfo, PrimaryKey, Table}
 
 object DatabaseMetadataCache {
-  def empty: DatabaseMetadataCache = DatabaseMetadataCache(DatabaseQuery.everything, List.empty, List.empty, List.empty, List.empty, List.empty)
+  def empty: DatabaseMetadataCache = DatabaseMetadataCache(DatabaseQuery.everything, List.empty, List.empty, List.empty, List.empty, List.empty, List.empty)
 }
 /**
   * Holds the metadata loaded from the DatabaseMetadata
@@ -20,7 +20,8 @@ case class DatabaseMetadataCache(
   tables: List[Table],
   columns: List[Column],
   crossReferences: List[CrossReference],
-  primaryKeys: List[PrimaryKey]) {
+  primaryKeys: List[PrimaryKey],
+  indexInfos: List[IndexInfo]) {
 
   /** Query this cache to find a table by name. */
   def findTableByName(

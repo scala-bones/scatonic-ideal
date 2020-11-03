@@ -23,6 +23,8 @@ class SchemaOutput(toCase: String => String, dataTypeOutput: DataTypeOutput[Stri
   private val ADD_COLUMN = toCase("add column")
   private val IS = toCase("is")
   private val ALTER_COLUMN = toCase("alter column")
+  private val ADD_CONSTRAINT = toCase("add constraint")
+  private val UNIQUE = toCase("unique")
   private val NOT_NULL = toCase("not null")
   private val DROP = toCase("drop")
   private val SET = toCase("set")
@@ -40,8 +42,10 @@ class SchemaOutput(toCase: String => String, dataTypeOutput: DataTypeOutput[Stri
     val updateColumnsSqls =
       diffResult.columnsDifferent.flatMap(c =>
         alterColumnOutput(schemaName, c._1.name, (c._2, c._3)))
+    val uniqueConstraintSql =
+        uniqueDiffOutput(schemaName, diffResult.uniqueDiffs)
 
-    tableSqls ::: columnSqls ::: updateColumnsSqls
+    tableSqls ::: columnSqls ::: updateColumnsSqls ::: uniqueConstraintSql
   }
 
   /** Create SQL statement to create the table from the IdealTable definition
@@ -81,8 +85,14 @@ class SchemaOutput(toCase: String => String, dataTypeOutput: DataTypeOutput[Stri
       case (cName, rem) => s"$COMMENT_ON_COLUMN $schemaName.${idealTable.name}.${cName} $IS '$rem'"
     }
 
+    val uniqueConstraints = idealTable.uniqueConstraints.map(uc => {
+      s"$UNIQUE (${uc.uniqueGroup.map(_.name).mkString(",")})"
+    })
+
+    val columnStatements = allColumns ::: uniqueConstraints
+
     val tableSql =
-      s"""$CREATE_TABLE $schemaName.${idealTable.name} (${allColumns.mkString(", ")})"""
+      s"""$CREATE_TABLE $schemaName.${idealTable.name} (${columnStatements.mkString(", ")})"""
 
     tableSql :: remark ::: columnRemarks
 
@@ -103,6 +113,15 @@ class SchemaOutput(toCase: String => String, dataTypeOutput: DataTypeOutput[Stri
     columnSql ::: commentSql
   }
 
+  def uniqueDiffOutput(schemaName: String, diffs: List[(IdealTable, UniqueDiff)]): List[String] = {
+    diffs.map(tableDiff => {
+      val constraintName = "wrapper_" + tableDiff._1.name + "_" + tableDiff._2.columnGroup.map(_.name).mkString("_") + "key"
+      val columnNames = tableDiff._2.columnGroup.map(_.name).mkString("(",",",")")
+      s"$ALTER_TABLE $schemaName.${tableDiff._1.name} $ADD_CONSTRAINT $constraintName $UNIQUE $columnNames"
+    })
+
+  }
+
   def alterColumnOutput(
     schemaName: String,
     tableName: String,
@@ -113,10 +132,10 @@ class SchemaOutput(toCase: String => String, dataTypeOutput: DataTypeOutput[Stri
           .dataTypeOutput(columnDiff._1.dataType)}"
       case ColumnRemarkDiff(_, _) =>
         s"$COMMENT_ON_COLUMN $schemaName.$tableName.${columnDiff._1.name} $IS '${columnDiff._1.remark
-          .getOrElse("")}'"
+          .getOrElse("").replace("'","''")}'"
       case ColumnNullableDiff(_, _) =>
         val setDrop = if (columnDiff._1.nullable) DROP else SET
-        s"$ALTER_TABLE $schemaName.$tableName $ALTER_COLUMN $setDrop $NOT_NULL"
+        s"$ALTER_TABLE $schemaName.$tableName $ALTER_COLUMN ${columnDiff._1.name} $setDrop $NOT_NULL"
     }
   }
 

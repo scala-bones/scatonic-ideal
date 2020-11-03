@@ -227,7 +227,46 @@ package object jdbc {
     foreignKeyName: Option[String],
     primaryKeyName: Option[String],
     deferrability: Deferrability.Value)
-  case class IndexInfo()
+
+  object IndexType extends Enumeration {
+    type IndexType = Value
+    case class Val protected (index: Short) extends super.Val
+    implicit def valueToNullableVal(x: Value): Val = x.asInstanceOf[Val]
+    def findByShort(s: Short): Option[Value] = values.find(_.index == s)
+
+    val tableIndexStatistic = Val(DatabaseMetaData.tableIndexStatistic)
+    val tableIndexClustered = Val(DatabaseMetaData.tableIndexClustered)
+    val tableIndexHashed = Val(DatabaseMetaData.tableIndexHashed)
+    val tableIndexOther = Val(DatabaseMetaData.tableIndexOther)
+
+  }
+
+  object AscDesc extends Enumeration {
+    type AscDesc = Value
+    case class Val protected (name: String) extends super.Val
+    implicit def valueToNullableVal(x: Value): Val = x.asInstanceOf[Val]
+    def findByString(str: String) = values.find(_.name == str)
+
+    val asc = Val("A")
+    val desc = Val("D")
+  }
+
+  case class IndexInfo(
+    tableCatalog: Option[String],
+    tableSchema: Option[String],
+    tableName: String,
+    nonUnique: Boolean,
+    indexQualifier: Option[String],
+    indexName: String,
+    indexType: IndexType.IndexType,
+    ordinalPosition: Short,
+    columnName: Option[String],
+    ascOrDesc: Option[AscDesc.AscDesc],
+    cardinality: Int,
+    pages: Int,
+    filterPosition: Option[String]
+                      )
+
   object TableType extends Enumeration {
     type TableType = Value
     case class Val protected (name: String) extends super.Val
