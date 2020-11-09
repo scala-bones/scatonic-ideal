@@ -37,7 +37,7 @@ lazy val core = (project in file("core"))
     name := "scatonic-ideal",
     libraryDependencies ++= Seq(
       "org.scalatestplus" %% "scalatestplus-scalacheck" % "3.1.0.0-RC2" % Test,
-      "org.scalatest" %% "scalatest-mustmatchers" % "3.2.0" % Test
+      "org.scalatest" %% "scalatest-mustmatchers" % "3.2.3" % Test
     ),
     description := "Core classes use for Native JDBC and Doobie Implementations"
   )
@@ -52,7 +52,7 @@ lazy val jdbc = (project in file("jdbc"))
     libraryDependencies ++= Seq(
       "org.postgresql" % "postgresql" % "42.2.14" % "test,it",
       "mysql" % "mysql-connector-java" % "8.0.21" % "test,it",
-      "org.scalatest" %% "scalatest" % "3.2.0" % "test,it",
+      "org.scalatest" %% "scalatest" % "3.2.3" % "test,it",
       "org.scalatestplus" %% "scalatestplus-scalacheck" % "3.1.0.0-RC2" % "test,it"
     )
   )
@@ -65,7 +65,7 @@ lazy val doobie = (project in file("doobie"))
     name := "doobie-scatonic-ideal",
     libraryDependencies ++= Seq(
       "org.tpolecat" %% "doobie-core" % doobieVersion,      
-      "org.scalatest" %% "scalatest" % "3.2.0" % Test,
+      "org.scalatest" %% "scalatest" % "3.2.3" % Test,
       "org.scalatestplus" %% "scalatestplus-scalacheck" % "3.1.0.0-RC2" % Test
     )
   )
