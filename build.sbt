@@ -1,6 +1,6 @@
 lazy val commonSettings = Seq(
   organization := "io.github.scala-bones",
-  scalaVersion := "2.13.2",
+  scalaVersion := "2.13.3",
   version := "0.2.0",
   homepage := Some(url("https://github.com/scala-bones/scatonic-ideal")),
   startYear := Some(2020),
