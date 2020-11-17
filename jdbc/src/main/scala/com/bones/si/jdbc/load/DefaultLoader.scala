@@ -9,7 +9,7 @@ import java.sql.{Connection, ResultSet}
 abstract class DefaultLoader[A] {
 
   /**
-   * Return a LazyList of ResultSet where each result set is returned by
+   * Return a Stream of ResultSet where each result set is returned by
    * the correct DatabaseMetadata.getA where A is the data being wrapped.
    * @param databaseQuery Used to specify what entities are to be loaded (it could be everything).
    * @param con The connection to use to query the DatabaseMetadata.  Do not call close() on this connection,
@@ -18,7 +18,7 @@ abstract class DefaultLoader[A] {
    *         the case where processing the list stops, which would cause the remaining ResultSets
    *         to remain unclosed.
    */
-  protected def loadFromQuery(databaseQuery: DatabaseQuery, con: Connection): LazyList[ResultSet]
+  protected def loadFromQuery(databaseQuery: DatabaseQuery, con: Connection): Stream[ResultSet]
 
   /**
    * Extend this method to extract a single row from the result set.  This

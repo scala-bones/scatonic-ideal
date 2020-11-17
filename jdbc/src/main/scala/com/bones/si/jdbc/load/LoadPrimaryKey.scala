@@ -7,8 +7,8 @@ import com.bones.si.jdbc.PrimaryKey
 object LoadPrimaryKey extends DefaultLoader[PrimaryKey] {
 
 
-  override protected def loadFromQuery(databaseQuery: DatabaseQuery, con: Connection): LazyList[ResultSet] =
-    Retrieve.databaseQueryToHierarchyQuery(databaseQuery).to(LazyList).map(param =>
+  override protected def loadFromQuery(databaseQuery: DatabaseQuery, con: Connection): Stream[ResultSet] =
+    Retrieve.databaseQueryToHierarchyQuery(databaseQuery).toStream.map(param =>
       con.getMetaData.getPrimaryKeys(param._1.orNull, param._2.orNull, param._3.orNull)
     )
 

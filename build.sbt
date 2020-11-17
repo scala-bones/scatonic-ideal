@@ -1,7 +1,13 @@
+lazy val scala212 = "2.12.12"
+lazy val scala213 = "2.13.3"
+lazy val supportedScalaVersions = List(scala212, scala213)
+
+
 lazy val commonSettings = Seq(
   organization := "io.github.scala-bones",
   scalaVersion := "2.13.3",
-  version := "0.2.0",
+  crossScalaVersions := supportedScalaVersions,
+  version := "0.3.0",
   homepage := Some(url("https://github.com/scala-bones/scatonic-ideal")),
   startYear := Some(2020),
   licenses := Seq("MIT" -> url("http://opensource.org/licenses/MIT")),

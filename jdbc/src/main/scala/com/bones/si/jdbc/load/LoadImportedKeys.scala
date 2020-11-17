@@ -8,9 +8,9 @@ object LoadImportedKeys extends DefaultLoader[ImportedKeys] {
 
   override protected def loadFromQuery(
     databaseQuery: DatabaseQuery,
-    con: Connection): LazyList[ResultSet] =
+    con: Connection): Stream[ResultSet] =
     Retrieve.databaseQueryToHierarchyQuery(databaseQuery)
-      .to(LazyList)
+      .toStream
       .map(param =>
         con.getMetaData.getImportedKeys(param._1.orNull, param._2.orNull, param._3.orNull))
 

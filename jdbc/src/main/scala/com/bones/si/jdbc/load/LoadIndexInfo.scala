@@ -6,7 +6,7 @@ import com.bones.si.jdbc.{AscDesc, IndexInfo, IndexType}
 
 object LoadIndexInfo extends DefaultLoader[IndexInfo] {
   /**
-   * Return a LazyList of ResultSet where each result set is returned by
+   * Return a Stream of ResultSet where each result set is returned by
    * the correct DatabaseMetadata.getA where A is the data being wrapped.
    *
    * @param databaseQuery Used to specify what entities are to be loaded (it could be everything).
@@ -16,8 +16,8 @@ object LoadIndexInfo extends DefaultLoader[IndexInfo] {
    *         the case where processing the list stops, which would cause the remaining ResultSets
    *         to remain unclosed.
    */
-  override protected def loadFromQuery(databaseQuery: DatabaseQuery, con: Connection): LazyList[ResultSet] =
-    Retrieve.databaseQueryToHierarchyQuery(databaseQuery).to(LazyList).map(param =>
+  override protected def loadFromQuery(databaseQuery: DatabaseQuery, con: Connection): Stream[ResultSet] =
+    Retrieve.databaseQueryToHierarchyQuery(databaseQuery).toStream.map(param =>
       con.getMetaData.getIndexInfo(param._1.orNull, param._2.orNull, param._3.orNull, false, true)
     )
 

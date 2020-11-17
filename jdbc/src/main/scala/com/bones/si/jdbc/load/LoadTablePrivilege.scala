@@ -5,8 +5,8 @@ import java.sql.{Connection, ResultSet}
 import com.bones.si.jdbc.{TablePrivilege, YesNo}
 
 object LoadTablePrivilege extends DefaultLoader[TablePrivilege] {
-  override protected def loadFromQuery(databaseQuery: DatabaseQuery, con: Connection): LazyList[ResultSet] =
-    Retrieve.databaseQueryToHierarchyQuery(databaseQuery).to(LazyList).map(param =>
+  override protected def loadFromQuery(databaseQuery: DatabaseQuery, con: Connection): Stream[ResultSet] =
+    Retrieve.databaseQueryToHierarchyQuery(databaseQuery).toStream.map(param =>
       con.getMetaData.getTablePrivileges(param._1.orNull, param._2.orNull, param._3.orNull)
     )
 

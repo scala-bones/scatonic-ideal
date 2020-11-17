@@ -7,8 +7,8 @@ import com.bones.si.jdbc.{Function, FunctionType}
 object LoadFunction extends DefaultLoader[Function] {
 
 
-  override protected def loadFromQuery(databaseQuery: DatabaseQuery, con: Connection): LazyList[ResultSet] =
-    Retrieve.databaseQueryToHierarchyQuery(databaseQuery).to(LazyList).map(param => {
+  override protected def loadFromQuery(databaseQuery: DatabaseQuery, con: Connection): Stream[ResultSet] =
+    Retrieve.databaseQueryToHierarchyQuery(databaseQuery).toStream.map(param => {
       con.getMetaData.getFunctions(param._1.orNull, param._2.orNull, param._3.orNull)
     })
 

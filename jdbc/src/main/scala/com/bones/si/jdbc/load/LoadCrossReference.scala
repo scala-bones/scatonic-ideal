@@ -7,8 +7,8 @@ import com.bones.si.jdbc.{CrossReference, Deferrability, UpdateDeleteRule}
 object LoadCrossReference extends DefaultLoader[CrossReference] {
 
 
-  override protected def loadFromQuery(databaseQuery: DatabaseQuery, con: Connection): LazyList[ResultSet] = {
-    val queryParams = Retrieve.databaseQueryToHierarchyQuery(databaseQuery).to(LazyList)
+  override protected def loadFromQuery(databaseQuery: DatabaseQuery, con: Connection): Stream[ResultSet] = {
+    val queryParams = Retrieve.databaseQueryToHierarchyQuery(databaseQuery).toStream
     queryParams.map(param =>
       con.getMetaData.getCrossReference(
         param._1.orNull,

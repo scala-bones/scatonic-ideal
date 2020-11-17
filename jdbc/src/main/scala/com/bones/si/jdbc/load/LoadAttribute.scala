@@ -6,9 +6,9 @@ import com.bones.si.jdbc.{DataType, DbAttribute, Nullable, YesNo}
 
 object LoadAttribute extends DefaultLoader[DbAttribute] {
 
-  override protected def loadFromQuery(databaseQuery: DatabaseQuery, con: Connection): LazyList[ResultSet] = {
+  override protected def loadFromQuery(databaseQuery: DatabaseQuery, con: Connection): Stream[ResultSet] = {
     val queryParams = Retrieve.databaseQueryToAttributeQuery(databaseQuery)
-    queryParams.to(LazyList).map(queryParam =>
+    queryParams.toStream.map(queryParam =>
       con.getMetaData.getAttributes(queryParam._1.orNull, queryParam._2.orNull, null, queryParam._3.orNull))
   }
 

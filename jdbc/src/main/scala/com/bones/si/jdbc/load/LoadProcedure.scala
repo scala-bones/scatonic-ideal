@@ -5,8 +5,8 @@ import java.sql.{Connection, ResultSet}
 import com.bones.si.jdbc.{Procedure, ProcedureType}
 
 object LoadProcedure extends DefaultLoader[Procedure] {
-  override protected def loadFromQuery(databaseQuery: DatabaseQuery, con: Connection): LazyList[ResultSet] =
-    Retrieve.databaseQueryToProcedureQuery(databaseQuery).to(LazyList).map(param =>
+  override protected def loadFromQuery(databaseQuery: DatabaseQuery, con: Connection): Stream[ResultSet] =
+    Retrieve.databaseQueryToProcedureQuery(databaseQuery).toStream.map(param =>
       con.getMetaData.getProcedures(param._1.orNull, param._2.orNull, param._3.orNull)
     )
 

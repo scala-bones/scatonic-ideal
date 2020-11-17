@@ -7,9 +7,9 @@ import com.bones.si.jdbc.{Column, DataType, Nullable, YesNo}
 object LoadColumn extends DefaultLoader[Column] {
 
 
-  override protected def loadFromQuery(databaseQuery: DatabaseQuery, con: Connection): LazyList[ResultSet] = {
+  override protected def loadFromQuery(databaseQuery: DatabaseQuery, con: Connection): Stream[ResultSet] = {
     val queryParams = Retrieve.databaseQueryToHierarchyQuery(databaseQuery)
-    queryParams.to(LazyList).map(queryParam =>
+    queryParams.toStream.map(queryParam =>
       con.getMetaData
         .getColumns(queryParam._1.orNull, queryParam._2.orNull, queryParam._3.orNull, null)
     )
