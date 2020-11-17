@@ -49,7 +49,9 @@ TODO:
   
 # Dependency
 
-```libraryDependencies += "io.github.scala-bones" %% "jdbc-scatonic-ideal" % "0.2.0"```
+Scatonic Ideal is cross compiled for Scala 2.12 and 2.13.
+
+```libraryDependencies += "io.github.scala-bones" %% "jdbc-scatonic-ideal" % "0.3.0"```
 
 You will need to add one of the supported DB JDBC Drivers, which for now, is Postgres.
 
