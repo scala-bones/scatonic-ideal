@@ -1,11 +1,11 @@
 lazy val scala212 = "2.12.12"
-lazy val scala213 = "2.13.3"
+lazy val scala213 = "2.13.5"
 lazy val supportedScalaVersions = List(scala212, scala213)
 
 
 lazy val commonSettings = Seq(
   organization := "io.github.scala-bones",
-  scalaVersion := "2.13.3",
+  scalaVersion := "2.13.5",
   crossScalaVersions := supportedScalaVersions,
   version := "0.3.0",
   homepage := Some(url("https://github.com/scala-bones/scatonic-ideal")),
