@@ -2,7 +2,6 @@ lazy val scala212 = "2.12.13"
 lazy val scala213 = "2.13.5"
 lazy val supportedScalaVersions = List(scala212, scala213)
 
-
 lazy val commonSettings = Seq(
   organization := "io.github.scala-bones",
   scalaVersion := "2.13.5",
@@ -34,7 +33,7 @@ lazy val commonSettings = Seq(
       Some("releases" at nexus + "service/local/staging/deploy/maven2")
   },
   publishMavenStyle := true,
-  addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.3" cross CrossVersion.full),
+  addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.3" cross CrossVersion.full)
 )
 
 lazy val core = (project in file("core"))
@@ -57,7 +56,7 @@ lazy val jdbc = (project in file("jdbc"))
     name := "jdbc-scatonic-ideal",
     libraryDependencies ++= Seq(
       "org.postgresql" % "postgresql" % "42.2.20" % "test,it",
-      "mysql" % "mysql-connector-java" % "8.0.24" % "test,it",
+      "mysql" % "mysql-connector-java" % "8.0.30" % "test,it",
       "org.scalatest" %% "scalatest" % "3.2.8" % "test,it",
       "org.scalatestplus" %% "scalatestplus-scalacheck" % "3.1.0.0-RC2" % "test,it"
     )
@@ -70,12 +69,10 @@ lazy val doobie = (project in file("doobie"))
     commonSettings,
     name := "doobie-scatonic-ideal",
     libraryDependencies ++= Seq(
-      "org.tpolecat" %% "doobie-core" % doobieVersion,      
+      "org.tpolecat" %% "doobie-core" % doobieVersion,
       "org.scalatest" %% "scalatest" % "3.2.8" % Test,
       "org.scalatestplus" %% "scalatestplus-scalacheck" % "3.1.0.0-RC2" % Test
     )
   )
   .dependsOn(core)
-*/
-
-
+ */
