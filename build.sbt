@@ -53,7 +53,7 @@ lazy val jdbc = (project in file("jdbc"))
   .settings(
     Defaults.itSettings,
     commonSettings,
-    parallelExecution in IntegrationTest := false,
+    (IntegrationTest / parallelExecution) := false,
     name := "jdbc-scatonic-ideal",
     libraryDependencies ++= Seq(
       "org.postgresql" % "postgresql" % "42.2.20" % "test,it",
